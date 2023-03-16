@@ -1,0 +1,62 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    env_file:
+      - .env
+
+  auth:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - mongo_db
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev auth
+
+  api:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    ports:
+      - '5001:5001'
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - mongo_db
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev api
+
+  postgres_db:
+    image: postgres:13
+    container_name: chatDb
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db/data:/val/lib/postgresql/data
+    env_file:
+      - .env
+
+  mongo_db:
+    image: mongo
+    restart: always
+    container_name: authDb
+    ports:
+      - 27017:27017
+    volumes:
+      - ./db/data:/val/lib/mongo/data
