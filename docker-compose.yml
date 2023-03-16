@@ -1,4 +1,5 @@
 version: '3'
+name: chat-app
 services:
   rabbitmq:
     image: rabbitmq:3-management
@@ -15,7 +16,7 @@ services:
   auth:
     build:
       context: ./
-      dockerfile: ./Dockerfile
+      dockerfile: ./apps/auth/Dockerfile
     env_file:
       - .env
     depends_on:
@@ -29,14 +30,14 @@ services:
   api:
     build:
       context: ./
-      dockerfile: ./Dockerfile
+      dockerfile: ./apps/api-gateway/Dockerfile
     ports:
       - '5001:5001'
     env_file:
       - .env
     depends_on:
       - rabbitmq
-      - mongo_db
+      - auth
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
