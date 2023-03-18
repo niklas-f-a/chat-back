@@ -8,11 +8,11 @@ export abstract class BaseRepository<T> {
   }
 
   public async create(data: Partial<T>) {
-    return await new this.entity(data).save();
+    return await this.entity.create(data);
   }
 
-  public async findOne(condition: FilterQuery<T>) {
-    return await this.entity.findOne(condition).exec();
+  public async findOne(condition: FilterQuery<T>, select = '-password') {
+    return await this.entity.findOne(condition).select(select).exec();
   }
 
   public async findById(id: string) {

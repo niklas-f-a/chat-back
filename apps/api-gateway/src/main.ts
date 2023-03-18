@@ -12,12 +12,15 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
+
   app.enableCors({
-    origin: 'http://127.0.0.1:5173',
+    origin: [`http://127.0.0.1:5173`, `http://localhost:5173`],
     methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
     credentials: true,
   });
+
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+
   const configService = app.get(ConfigService);
   const port = configService.get('port');
   const mongoCred = configService.get('authDb');

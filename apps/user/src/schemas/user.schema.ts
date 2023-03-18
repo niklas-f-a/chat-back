@@ -13,14 +13,21 @@ export class User {
   @Prop({ select: false })
   password?: string;
 
-  // @Prop({ unique: true, sparse: true, select: true })
-  // githubId: string | null;
+  @Prop({
+    required: false,
+    index: {
+      unique: true,
+      partialFilterExpression: { githubId: { $type: 'string' } },
+    },
+    default: null,
+  })
+  githubId?: string;
 
-  // @Prop()
-  // photos: { value: string }[];
+  @Prop()
+  photos: { value: string }[];
 
-  // @Prop()
-  // chatRooms: number[];
+  @Prop()
+  chatRooms: number[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

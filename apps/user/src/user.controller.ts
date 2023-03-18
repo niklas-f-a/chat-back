@@ -16,10 +16,20 @@ export class UserController {
     @Inject(ServiceTokens.USER) private readonly userService: UserService,
   ) {}
 
-  @MessagePattern({ cmd: 'sign-up' })
+  @MessagePattern({ cmd: 'signup' })
   signup(@Ctx() context: RmqContext, @Payload() signUpDto: SignupDto) {
     this.sharedService.rabbitAck(context);
 
     return this.userService.create(signUpDto);
+  }
+
+  @MessagePattern({ cmd: 'find-by-email' })
+  async findByEmail(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { email: string; select: string },
+  ) {
+    this.sharedService.rabbitAck(context);
+    const { email, select } = payload;
+    return await this.userService.findOneByEmail(email, select);
   }
 }

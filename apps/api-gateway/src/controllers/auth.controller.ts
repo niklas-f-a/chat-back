@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError, map, switchMap } from 'rxjs';
-import { SignupDto } from '../../../../libs/shared-lib/src/dto';
+import { LoginDto, SignupDto } from '../../../../libs/shared-lib/src/dto';
 import { GithubAuthGuard } from '../guards';
 
 @Controller({
@@ -42,23 +42,27 @@ export class AuthController {
     @Session() session: Record<string, any>,
     @Body() signUpDto: SignupDto,
   ) {
-    return this.userClient.send({ cmd: 'sign-up' }, signUpDto).pipe(
+    return this.authClient.send({ cmd: 'signup' }, signUpDto).pipe(
       map((value) => {
+        session['user'] = value;
         return value;
       }),
       catchError(() => {
         throw new ConflictException('Something went wrong');
       }),
-      // switchMap(({ email }) =>
-      //   this.authClient.send(
-      //     { cmd: 'login' },
-      //     { email, password: signUpDto.password },
-      //   ),
-      // ),
-      // map((value) => {
-      //   session['access_token'] = value.access_token;
-      //   return { message: 'ok' };
-      // }),
+    );
+  }
+
+  @Post('login')
+  login(@Session() session: Record<string, any>, @Body() loginDto: LoginDto) {
+    return this.authClient.send({ cmd: 'login' }, loginDto).pipe(
+      map((value) => {
+        session['user'] = value;
+        return value;
+      }),
+      catchError((error) => {
+        throw new ForbiddenException(error.message);
+      }),
     );
   }
 }
