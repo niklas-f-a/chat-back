@@ -18,7 +18,6 @@ async function bootstrap() {
     credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-
   const configService = app.get(ConfigService);
   const port = configService.get('port');
   const mongoCred = configService.get('authDb');
