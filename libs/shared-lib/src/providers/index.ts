@@ -1,1 +1,1 @@
-export * from './rabbit.provider';
+export { default as rabbitProvider } from './rabbit.provider';

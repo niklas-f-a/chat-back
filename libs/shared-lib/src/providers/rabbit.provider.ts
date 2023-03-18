@@ -1,8 +1,8 @@
 import { ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { RabbitQueue, ServiceTokens } from '../config/constants';
+import { ClientTokens, RabbitQueue } from '../config/constants';
 
-export default (service: ServiceTokens, rabbitQueue: RabbitQueue) => ({
+export default (service: ClientTokens, rabbitQueue: RabbitQueue) => ({
   provide: service,
   useFactory: (configService: ConfigService) => {
     const { url, queue } = configService.get('rabbitOptions') as {
