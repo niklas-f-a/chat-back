@@ -1,10 +1,10 @@
 import {
   configuration,
   ServiceTokens,
-  SharedService,
   rabbitProvider,
   ClientTokens,
   RabbitQueue,
+  SharedModule,
 } from '@app/shared-lib';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -16,7 +16,7 @@ import { AuthService } from './auth.service';
     ConfigModule.forRoot({
       load: [configuration],
     }),
-    SharedService,
+    SharedModule,
   ],
   controllers: [AuthController],
   providers: [

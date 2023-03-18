@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { map, switchMap } from 'rxjs';
-import { SignupDto } from '../dto';
+import { SignupDto } from '../../../../libs/shared-lib/src/dto';
 import { GithubAuthGuard } from '../guards';
 
 @Controller({
