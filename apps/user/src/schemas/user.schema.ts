@@ -11,7 +11,7 @@ export class User {
   email: string;
 
   @Prop({ select: false })
-  password: string;
+  password?: string;
 
   // @Prop({ unique: true, sparse: true, select: true })
   // githubId: string | null;

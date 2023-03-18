@@ -1,7 +1,9 @@
 import { ClientTokens } from '@app/shared-lib';
 import {
   Body,
+  ConflictException,
   Controller,
+  ForbiddenException,
   Get,
   Inject,
   Post,
@@ -9,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { map, switchMap } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs';
 import { SignupDto } from '../../../../libs/shared-lib/src/dto';
 import { GithubAuthGuard } from '../guards';
 
@@ -42,10 +44,10 @@ export class AuthController {
   ) {
     return this.userClient.send({ cmd: 'sign-up' }, signUpDto).pipe(
       map((value) => {
-        // if (value.status === 409) {
-        //   throw value.response;
-        // }
         return value;
+      }),
+      catchError(() => {
+        throw new ConflictException('Something went wrong');
       }),
       // switchMap(({ email }) =>
       //   this.authClient.send(

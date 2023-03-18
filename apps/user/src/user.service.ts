@@ -12,7 +12,20 @@ export class UserService {
 
   async create(cred: SignupDto) {
     try {
-      return await this.userRepository.create(cred);
+      const userExist = await this.findOne(cred.email);
+      if (userExist) throw new RpcException('email already exist');
+
+      const newUser = (await this.userRepository.create(cred)).toObject();
+      delete newUser.password;
+      return newUser;
+    } catch (error) {
+      throw new RpcException(error);
+    }
+  }
+
+  async findOne(email: string) {
+    try {
+      return await this.userRepository.findOne({ email });
     } catch (error) {
       throw new RpcException(error);
     }

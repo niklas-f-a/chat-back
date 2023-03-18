@@ -1,4 +1,9 @@
-import { configuration } from '@app/shared-lib/index';
+import {
+  ClientTokens,
+  configuration,
+  rabbitProvider,
+  RabbitQueue,
+} from '@app/shared-lib/index';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
@@ -13,7 +18,12 @@ import { GithubStrategy } from './strategies';
     }),
     PassportModule.register({ session: true }),
   ],
-  controllers: [AuthController, ChatController],
-  providers: [SessionSerializer, GithubStrategy],
+  controllers: [AuthController],
+  providers: [
+    SessionSerializer,
+    GithubStrategy,
+    rabbitProvider(ClientTokens.AUTH, RabbitQueue.AUTH),
+    rabbitProvider(ClientTokens.USER, RabbitQueue.USER),
+  ],
 })
 export class AppModule {}

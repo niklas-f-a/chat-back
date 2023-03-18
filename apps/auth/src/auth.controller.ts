@@ -1,9 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
+import { ServiceTokens } from '@app/shared-lib';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 @Controller()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    @Inject(ServiceTokens.AUTH) private readonly authService: AuthService,
+  ) {}
 
   @Get()
   getHello(): string {
