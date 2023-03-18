@@ -1,5 +1,5 @@
 import { SignupDto } from '@app/shared-lib/dto';
-import { UsersRepository } from '@app/shared-lib/repositories';
+import { UsersRepository } from 'apps/user/src/repositories';
 import { Inject, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 

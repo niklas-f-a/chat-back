@@ -1,5 +1,5 @@
 import { configuration, ServiceTokens, SharedModule } from '@app/shared-lib';
-import { UsersRepository } from '@app/shared-lib/repositories';
+import { UsersRepository } from 'apps/user/src/repositories';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
