@@ -8,15 +8,14 @@ import { makeMongo } from '@app/shared-lib/store/mongo.store';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
-  app.enableVersioning({
-    type: VersioningType.URI,
-  });
-
   app.enableCors({
     origin: [`http://127.0.0.1:5173`, `http://localhost:5173`],
     methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
     credentials: true,
+  });
+  app.setGlobalPrefix('api');
+  app.enableVersioning({
+    type: VersioningType.URI,
   });
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
@@ -34,6 +33,7 @@ async function bootstrap() {
       ? makeMongo({
           uri: mongoCred.uri,
           collection: sessionCred.collection,
+          sess: session,
         })
       : undefined;
 

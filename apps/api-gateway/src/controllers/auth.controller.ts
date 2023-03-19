@@ -7,13 +7,17 @@ import {
   Get,
   Inject,
   Post,
+  Redirect,
   Session,
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { catchError, map, switchMap } from 'rxjs';
+import { User } from 'apps/user/src/schemas';
+import { catchError, map } from 'rxjs';
 import { LoginDto, SignupDto } from '../../../../libs/shared-lib/src/dto';
 import { GithubAuthGuard } from '../guards';
+import { AuthenticatedGuard } from '../guards/authenticated.guard';
+// import { AuthenticatedGuard } from '../guards/authenticated.guard';
 
 @Controller({
   version: '1',
@@ -25,17 +29,18 @@ export class AuthController {
     @Inject(ClientTokens.USER) private userClient: ClientProxy,
   ) {}
 
-  // @Get('github/login')
-  // @UseGuards(GithubAuthGuard)
-  // loginGithub() {
-  //   return;
-  // }
+  @Get('github/login')
+  @UseGuards(GithubAuthGuard)
+  loginGithub() {
+    return;
+  }
 
-  // @Get('/github/callback')
-  // @UseGuards(GithubAuthGuard)
-  // authCallback() {
-  //   return { message: 'ok' };
-  // }
+  @Get('github/callback')
+  @UseGuards(GithubAuthGuard)
+  @Redirect('http://localhost:5173', 301)
+  authCallback() {
+    return { message: 'ok' };
+  }
 
   @Post('signup')
   signup(
@@ -43,8 +48,8 @@ export class AuthController {
     @Body() signUpDto: SignupDto,
   ) {
     return this.authClient.send({ cmd: 'signup' }, signUpDto).pipe(
-      map((value) => {
-        session['user'] = value;
+      map((value: User) => {
+        session.userId = value.email;
         return value;
       }),
       catchError(() => {
@@ -56,13 +61,23 @@ export class AuthController {
   @Post('login')
   login(@Session() session: Record<string, any>, @Body() loginDto: LoginDto) {
     return this.authClient.send({ cmd: 'login' }, loginDto).pipe(
-      map((value) => {
-        session['user'] = value;
+      map((value: User) => {
+        session.userId = value.email;
         return value;
       }),
       catchError((error) => {
+        console.log(error);
         throw new ForbiddenException(error.message);
       }),
     );
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('status')
+  status(@Session() session: Record<string, any>) {
+    // console.log(session);
+    return { message: 'ok' };
+    // if (!session.userId) throw new ForbiddenException('Unauthorized');
+    // return this.authClient.send({ cmd: 'verify-session' }, session.userId);
   }
 }

@@ -7,6 +7,7 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
+import { User } from './schemas';
 import { UserService } from './user.service';
 
 @Controller()
@@ -15,6 +16,30 @@ export class UserController {
     private readonly sharedService: SharedService,
     @Inject(ServiceTokens.USER) private readonly userService: UserService,
   ) {}
+
+  @MessagePattern({ cmd: 'find-by-id' })
+  findById(@Ctx() context: RmqContext, @Payload() userId: string) {
+    this.sharedService.rabbitAck(context);
+
+    return this.userService.findById(userId);
+  }
+
+  @MessagePattern({ cmd: 'find-by-github-id' })
+  findByGithubId(@Ctx() context: RmqContext, @Payload() userId: string) {
+    this.sharedService.rabbitAck(context);
+
+    return this.userService.findByGithubId(userId);
+  }
+
+  @MessagePattern({ cmd: 'find-or-create-github-user' })
+  async findByGithubIdOrCreate(
+    @Ctx() context: RmqContext,
+    @Payload() user: User,
+  ) {
+    this.sharedService.rabbitAck(context);
+
+    return await this.userService.findByGithubIdOrCreate(user);
+  }
 
   @MessagePattern({ cmd: 'signup' })
   signup(@Ctx() context: RmqContext, @Payload() signUpDto: SignupDto) {
@@ -29,6 +54,7 @@ export class UserController {
     @Payload() payload: { email: string; select: string },
   ) {
     this.sharedService.rabbitAck(context);
+
     const { email, select } = payload;
     return await this.userService.findOneByEmail(email, select);
   }

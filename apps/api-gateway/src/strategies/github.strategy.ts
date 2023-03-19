@@ -19,10 +19,10 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
 
   async validate(accessToken: string, refreshToken: string, profile: Profile) {
     const { id: githubId, username, photos } = profile;
-    // CHANGES NEEDED
+
     return await firstValueFrom(
       this.userClient.send(
-        { cmd: 'find-or-create-from-githubId' },
+        { cmd: 'find-or-create-github-user' },
         {
           githubId,
           username,

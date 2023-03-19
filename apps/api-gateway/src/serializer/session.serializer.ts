@@ -2,27 +2,27 @@ import { ClientTokens } from '@app/shared-lib';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PassportSerializer } from '@nestjs/passport';
+import { User } from 'apps/user/src/schemas';
 import { firstValueFrom, map } from 'rxjs';
 
 @Injectable()
 export class SessionSerializer extends PassportSerializer {
-  constructor(@Inject(ClientTokens.USER) private userService: ClientProxy) {
+  constructor(@Inject(ClientTokens.USER) private userClient: ClientProxy) {
     super();
   }
 
-  serializeUser(user: any, done: (err: Error | null, user: any) => void) {
-    // Change stored value and fix deserialization
-
+  serializeUser(user: User, done: (err: Error | null, user: User) => void) {
+    console.log(user, 'serializing');
     done(null, user);
   }
 
   async deserializeUser(
-    user: any,
-    done: (err: Error | null, user: any) => void,
+    user: User,
+    done: (err: Error | null, user: User | null) => void,
   ) {
     const foundUser = await firstValueFrom(
-      this.userService
-        .send({ cmd: 'find-github-user' }, user?.githubId)
+      this.userClient
+        .send({ cmd: 'find-by-github-id' }, user?.githubId)
         .pipe(map((value) => value)),
     );
 

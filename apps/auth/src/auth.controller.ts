@@ -45,4 +45,11 @@ export class AuthController {
       .send({ cmd: 'find-by-email' }, emailWithSelect)
       .pipe(switchMap((value) => this.authService.login(password, value)));
   }
+
+  @MessagePattern({ cmd: 'verify-session' })
+  verifySession(@Ctx() context: RmqContext, @Payload() userId: string) {
+    this.sharedService.rabbitAck(context);
+    return this.userClient.send({ cmd: 'find-by-id' }, userId);
+    // .pipe(switchMap((value) => this.authService.verifySession(value)));
+  }
 }

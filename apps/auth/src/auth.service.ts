@@ -22,4 +22,9 @@ export class AuthService {
     delete user.password;
     return user;
   }
+
+  // async verifySession(userId: string) {
+  //   if (!userId) throw new RpcException('Forbidden.');
+
+  // }
 }
