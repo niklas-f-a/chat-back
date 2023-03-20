@@ -49,7 +49,7 @@ export class AuthController {
   ) {
     return this.authClient.send({ cmd: 'signup' }, signUpDto).pipe(
       map((value: User) => {
-        session.userId = value.email;
+        session['user'] = value;
         return value;
       }),
       catchError(() => {
@@ -62,7 +62,7 @@ export class AuthController {
   login(@Session() session: Record<string, any>, @Body() loginDto: LoginDto) {
     return this.authClient.send({ cmd: 'login' }, loginDto).pipe(
       map((value: User) => {
-        session.userId = value.email;
+        session['user'] = value;
         return value;
       }),
       catchError((error) => {
@@ -75,9 +75,6 @@ export class AuthController {
   @UseGuards(AuthenticatedGuard)
   @Get('status')
   status(@Session() session: Record<string, any>) {
-    // console.log(session);
-    return { message: 'ok' };
-    // if (!session.userId) throw new ForbiddenException('Unauthorized');
-    // return this.authClient.send({ cmd: 'verify-session' }, session.userId);
+    return session?.user;
   }
 }
