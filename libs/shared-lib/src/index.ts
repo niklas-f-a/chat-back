@@ -6,4 +6,4 @@ export * from './config/constants';
 
 export * from './providers';
 
-export * from './store/mongo.store';
+export * from './store/session.store';

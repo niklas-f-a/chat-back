@@ -9,13 +9,14 @@ interface IRequest extends Request {
 }
 
 @Injectable()
-export class AddToRequest implements NestMiddleware {
+export class RequestUser implements NestMiddleware {
   constructor(
     @Inject(ClientTokens.USER) private readonly userClient: ClientProxy,
   ) {}
   async use(req: Request, _: Response, next: NextFunction) {
     const { userId } = req?.session as unknown as Record<string, string>;
     if (userId) {
+      console.log(userId);
       const user = await firstValueFrom(
         this.userClient
           .send({ cmd: 'find-by-id' }, userId)

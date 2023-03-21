@@ -1,7 +1,7 @@
 import * as makeMongoStore from 'connect-mongodb-session';
 import * as session from 'express-session';
 
-export const makeMongo = ({
+export const makeStore = ({
   uri,
   collection,
   sess,

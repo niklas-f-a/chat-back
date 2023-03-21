@@ -8,7 +8,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController, ChatController } from './controllers';
-import { AddToRequest } from './middleware/add-to-request.middleware';
+import { RequestUser } from './middleware';
 import { SessionSerializer } from './serializer';
 import { GithubStrategy } from './strategies';
 
@@ -29,6 +29,6 @@ import { GithubStrategy } from './strategies';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AddToRequest).forRoutes('*');
+    consumer.apply(RequestUser).forRoutes('*');
   }
 }

@@ -8,6 +8,7 @@ import {
   Inject,
   Post,
   Redirect,
+  Req,
   Session,
   UseGuards,
 } from '@nestjs/common';
@@ -49,7 +50,7 @@ export class AuthController {
   ) {
     return this.authClient.send({ cmd: 'signup' }, signUpDto).pipe(
       map((value: User) => {
-        session['user'] = value?._id;
+        session['userId'] = value?._id;
         return value;
       }),
       catchError(() => {
@@ -66,7 +67,6 @@ export class AuthController {
         return value;
       }),
       catchError((error) => {
-        console.log(error);
         throw new ForbiddenException(error.message);
       }),
     );
@@ -74,7 +74,7 @@ export class AuthController {
 
   @UseGuards(AuthenticatedGuard)
   @Get('status')
-  status(@Session() session: Record<string, any>) {
-    return session?.user;
+  status(@Session() session: Record<string, any>, @Req() req: any) {
+    return req?.user;
   }
 }

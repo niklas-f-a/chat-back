@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as session from 'express-session';
 import * as passport from 'passport';
-import { makeMongo } from '@app/shared-lib/store/mongo.store';
+import { makeStore } from '@app/shared-lib/store/session.store';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -30,7 +30,7 @@ async function bootstrap() {
 
   const store =
     process.env.NODE_ENV === 'production'
-      ? makeMongo({
+      ? makeStore({
           uri: mongoCred.uri,
           collection: sessionCred.collection,
           sess: session,
