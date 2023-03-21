@@ -19,12 +19,13 @@ import { GithubStrategy } from './strategies';
     }),
     PassportModule.register({ session: true }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, ChatController],
   providers: [
     SessionSerializer,
     GithubStrategy,
     rabbitProvider(ClientTokens.AUTH, RabbitQueue.AUTH),
     rabbitProvider(ClientTokens.USER, RabbitQueue.USER),
+    rabbitProvider(ClientTokens.CHAT, RabbitQueue.CHAT),
   ],
 })
 export class AppModule implements NestModule {

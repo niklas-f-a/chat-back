@@ -42,20 +42,16 @@ export class ChatController {
 
   @Get()
   findAllChatRooms(@User() user: IUser) {
-    // const payload = {
-    //   userId: user.sub,
-    //   email: user.email,
-    // };
-    // return this.userClient
-    //   .send({ cmd: 'find-by-email' }, payload)
-    //   .pipe(
-    //     switchMap((value) =>
-    //       this.chatClient.send(
-    //         { cmd: 'get-chat-rooms' },
-    //         { chatRoomIds: value.chatRooms },
-    //       ),
-    //     ),
-    //   );
+    return this.userClient
+      .send({ cmd: 'find-by-id' }, user._id)
+      .pipe(
+        switchMap((value) =>
+          this.chatClient.send(
+            { cmd: 'get-chat-rooms' },
+            { chatRoomIds: value.chatRooms },
+          ),
+        ),
+      );
   }
 
   // @Delete(':id')

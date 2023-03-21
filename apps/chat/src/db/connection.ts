@@ -7,6 +7,7 @@ export const dbConnection = [
     imports: [ConfigModule],
     useFactory: async (configService: ConfigService) => {
       const dbOptions = configService.get('chatDb');
+
       return {
         dialect: 'postgres',
         ...dbOptions,

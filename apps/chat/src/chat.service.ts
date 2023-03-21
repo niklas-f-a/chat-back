@@ -1,15 +1,15 @@
 // import { ChatRoomDto } from '@app/shared/dto';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-// import { InjectModel } from '@nestjs/sequelize';
+import { InjectModel } from '@nestjs/sequelize';
 import { catchError, concatMap, from, toArray } from 'rxjs';
 import { ChatRoom, Message } from './db/models';
 
 @Injectable()
 export class ChatService {
   constructor(
-    //     @InjectModel(ChatRoom)
-    private chatRoomModel: typeof ChatRoom, //     @InjectModel(Message) //     private messageModel: typeof Message,
+    @InjectModel(ChatRoom) private chatRoomModel: typeof ChatRoom,
+    @InjectModel(Message) private messageModel: typeof Message,
   ) {}
 
   //   async createChatRoom(chatRoomDto: ChatRoomDto) {

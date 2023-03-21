@@ -31,6 +31,7 @@ export class ChatController {
     @Ctx() context: RmqContext,
   ) {
     this.sharedService.rabbitAck(context);
+    console.log(chatRoomIds);
     return this.chatService.getAllChatRooms(chatRoomIds);
   }
   //   @MessagePattern({ cmd: 'post-message' })

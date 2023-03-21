@@ -15,4 +15,11 @@ export default () => ({
   authDb: {
     uri: `mongodb://${process.env.MONGO_INITDB_ROOT_USERNAME}:${process.env.MONGO_INITDB_ROOT_PASSWORD}@${process.env.MONGO_HOST}/${process.env.MONGO_DB_NAME}${process.env.MONGO_OPTIONS}`,
   },
+  chatDb: {
+    username: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DB,
+    port: process.env.POSTGRES_PORT && parseInt(process.env.POSTGRES_PORT),
+    host: process.env.POSTGRES_HOST,
+  },
 });
