@@ -4,10 +4,11 @@ import {
   rabbitProvider,
   RabbitQueue,
 } from '@app/shared-lib/index';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController, ChatController } from './controllers';
+import { AddToRequest } from './middleware/add-to-request.middleware';
 import { SessionSerializer } from './serializer';
 import { GithubStrategy } from './strategies';
 
@@ -26,4 +27,8 @@ import { GithubStrategy } from './strategies';
     rabbitProvider(ClientTokens.USER, RabbitQueue.USER),
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AddToRequest).forRoutes('*');
+  }
+}
