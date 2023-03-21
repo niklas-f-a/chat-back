@@ -13,11 +13,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { User } from 'apps/user/src/schemas';
 import { catchError, map } from 'rxjs';
 import { LoginDto, SignupDto } from '../../../../libs/shared-lib/src/dto';
 import { GithubAuthGuard } from '../guards';
-import { AuthenticatedGuard } from '../guards/authenticated.guard';
+import { AuthenticatedGuard } from '../../../../libs/shared-lib/src/guards/authenticated.guard';
+import { IUser } from '@app/shared-lib/interfaces';
 // import { AuthenticatedGuard } from '../guards/authenticated.guard';
 
 @Controller({
@@ -49,7 +49,7 @@ export class AuthController {
     @Body() signUpDto: SignupDto,
   ) {
     return this.authClient.send({ cmd: 'signup' }, signUpDto).pipe(
-      map((value: User) => {
+      map((value: IUser) => {
         session['userId'] = value?._id;
         return value;
       }),
@@ -62,7 +62,7 @@ export class AuthController {
   @Post('login')
   login(@Session() session: Record<string, any>, @Body() loginDto: LoginDto) {
     return this.authClient.send({ cmd: 'login' }, loginDto).pipe(
-      map((value: User) => {
+      map((value: IUser) => {
         session['userId'] = value?._id;
         return value;
       }),

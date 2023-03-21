@@ -7,3 +7,5 @@ export * from './config/constants';
 export * from './providers';
 
 export * from './store/session.store';
+
+export * from './guards';

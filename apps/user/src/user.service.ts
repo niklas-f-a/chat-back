@@ -2,7 +2,7 @@ import { SignupDto } from '@app/shared-lib/dto';
 import { UsersRepository } from 'apps/user/src/repositories';
 import { Inject, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { User } from './schemas';
+import { IUser } from '@app/shared-lib/interfaces';
 
 @Injectable()
 export class UserService {
@@ -27,7 +27,7 @@ export class UserService {
     });
   }
 
-  async findByGithubIdOrCreate(user: User) {
+  async findByGithubIdOrCreate(user: IUser) {
     const foundUser = await this.findByGithubId(user.githubId);
     if (foundUser) return foundUser;
 

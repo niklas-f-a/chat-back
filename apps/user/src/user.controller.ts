@@ -1,5 +1,6 @@
 import { ServiceTokens, SharedService } from '@app/shared-lib';
 import { SignupDto } from '@app/shared-lib/dto';
+import { IUser } from '@app/shared-lib/interfaces';
 import { Controller, Inject } from '@nestjs/common';
 import {
   Ctx,
@@ -7,7 +8,6 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { User } from './schemas';
 import { UserService } from './user.service';
 
 @Controller()
@@ -34,7 +34,7 @@ export class UserController {
   @MessagePattern({ cmd: 'find-or-create-github-user' })
   async findByGithubIdOrCreate(
     @Ctx() context: RmqContext,
-    @Payload() user: User,
+    @Payload() user: IUser,
   ) {
     this.sharedService.rabbitAck(context);
 

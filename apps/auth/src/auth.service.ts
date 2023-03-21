@@ -1,6 +1,6 @@
+import { IUser } from '@app/shared-lib/interfaces';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { User } from 'apps/user/src/schemas';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class AuthService {
     return await bcrypt.compare(password, hashPass);
   }
 
-  async login(password: string, user: User) {
+  async login(password: string, user: IUser) {
     if (!user || !user.password) throw new RpcException('Invalid credentials.');
 
     const isMatch = await this.verifyPassword(password, user.password);
