@@ -1,27 +1,35 @@
 // import { ChatRoomDto } from '@app/shared/dto';
+import { ChatSpacePayload } from '@app/shared-lib';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/sequelize';
 import { catchError, concatMap, from, toArray } from 'rxjs';
-import { ChatRoom, Message } from './db/models';
+import { ChatRoom, ChatSpace, Message } from './db/models';
 
 @Injectable()
 export class ChatService {
   constructor(
     @InjectModel(ChatRoom) private chatRoomModel: typeof ChatRoom,
     @InjectModel(Message) private messageModel: typeof Message,
+    @InjectModel(ChatSpace) private chatSpaceModel: typeof ChatSpace,
   ) {}
 
-  //   async createChatRoom(chatRoomDto: ChatRoomDto) {
-  //     return await this.chatRoomModel.create({
-  //       ...chatRoomDto,
-  //       createdBy: chatRoomDto.userId,
-  //     });
-  //   }
+  async createChatSpace(chatRoomDto: ChatSpacePayload) {
+    const chatSpace = await this.chatSpaceModel.create({
+      ...chatRoomDto,
+      createdBy: chatRoomDto.userId,
+    });
 
-  getAllChatRooms(chatRoomIds: string[]) {
-    return from(chatRoomIds).pipe(
-      concatMap((value) => this.chatRoomModel.findByPk(value)),
+    const chatRoom = await this.chatRoomModel.create({
+      chatSpaceId: chatSpace.id,
+    });
+
+    return { chatSpace, chatRoom };
+  }
+
+  getAllChatSpaces(chatSpaceIds: string[]) {
+    return from(chatSpaceIds).pipe(
+      concatMap((value) => this.chatSpaceModel.findByPk(value)),
       toArray(),
       catchError((error) => {
         throw new RpcException(error.message);
@@ -29,34 +37,39 @@ export class ChatService {
     );
   }
 
-  //   addMessage() {
-  //     return this.messageModel.create({
-  //       message: 'kkakaka',
-  //       userId: 1,
-  //       roomId: 4,
-  //     });
-  //   }
+  findOneChatSpace(chatRoomId: string) {
+    return this.chatSpaceModel.findByPk(chatRoomId);
+  }
 
-  //   findOneChatRoom(chatRoomId: string) {
-  //     return this.chatRoomModel.findByPk(chatRoomId, { include: [Message] });
-  //   }
+  async deleteChatSpace(chatSpaceId: string) {
+    // delete chat rooms and messages
 
-  //   async deleteChatRoom(roomId: string) {
-  //     await this.messageModel.destroy({
-  //       where: { roomId },
-  //     });
+    // await this.chatRoomModel.destroy({
+    //   where: { chatSpaceId },
+    // });
 
-  //     const roomsDeleted = await this.chatRoomModel.destroy({
-  //       where: { id: roomId },
-  //     });
+    const roomsDeleted = await this.chatSpaceModel.destroy({
+      where: { id: chatSpaceId },
+    });
 
-  //     if (roomsDeleted > 0) {
-  //       return { message: `room with id: ${roomId} was deleted` };
-  //     }
-  //     return new RpcException(`Could not delete room with id: ${roomId}`);
-  //   }
+    if (roomsDeleted > 0) {
+      return { message: `room with id: ${chatSpaceId} was deleted` };
+    }
+    return new RpcException(`Could not delete room with id: ${chatSpaceId}`);
+  }
 
-  //   async updateChatRoom({ roomId, name }: any) {
-  //     return this.chatRoomModel.update({ name }, { where: { id: roomId } });
-  //   }
+  async updateChatSpace({
+    chatSpaceId,
+    name,
+  }: {
+    chatSpaceId: string;
+    name: string;
+  }) {
+    const chatSpace = await this.findOneChatSpace(chatSpaceId);
+    if (!chatSpace) {
+      throw new RpcException('Resource not found');
+    }
+    chatSpace.name = name;
+    return chatSpace?.save();
+  }
 }

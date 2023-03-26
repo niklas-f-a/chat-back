@@ -1,20 +1,22 @@
 import {
+  BelongsTo,
   Column,
   CreatedAt,
+  DataType,
   ForeignKey,
   HasMany,
   Model,
   Table,
   UpdatedAt,
 } from 'sequelize-typescript';
-import { Message } from '.';
+import { ChatSpace, Message } from '.';
 
 @Table
 export class ChatRoom extends Model {
-  @Column
-  createdBy: string;
-
-  @Column
+  @Column({
+    type: DataType.TEXT,
+    defaultValue: 'Generall',
+  })
   name: string;
 
   @CreatedAt
@@ -26,6 +28,9 @@ export class ChatRoom extends Model {
   @HasMany(() => Message)
   messages: Message[];
 
-  @ForeignKey(() => Message)
-  messageId: number;
+  @BelongsTo(() => ChatSpace)
+  chatSpace: ChatSpace;
+
+  @ForeignKey(() => ChatSpace)
+  chatSpaceId: string;
 }

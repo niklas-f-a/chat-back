@@ -12,14 +12,14 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { dbConnection } from './db/connection';
-import { ChatRoom, Message } from './db/models';
+import { ChatRoom, ChatSpace, Message } from './db/models';
 import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     GatewayModule,
-    SequelizeModule.forFeature([ChatRoom, Message]),
+    SequelizeModule.forFeature([ChatRoom, Message, ChatSpace]),
     ...dbConnection,
   ],
   controllers: [ChatController],

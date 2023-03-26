@@ -18,7 +18,7 @@ import { LoginDto, SignupDto } from '../../../../libs/shared-lib/src/dto';
 import { GithubAuthGuard } from '../guards';
 import { AuthenticatedGuard } from '../../../../libs/shared-lib/src/guards/authenticated.guard';
 import { IUser } from '@app/shared-lib/interfaces';
-// import { AuthenticatedGuard } from '../guards/authenticated.guard';
+import { Request } from 'express';
 
 @Controller({
   version: '1',
@@ -74,7 +74,7 @@ export class AuthController {
 
   @UseGuards(AuthenticatedGuard)
   @Get('status')
-  status(@Session() session: Record<string, any>, @Req() req: any) {
+  status(@Session() session: Record<string, any>, @Req() req: Request) {
     return req?.user;
   }
 }

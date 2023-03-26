@@ -1,4 +1,8 @@
-import { AuthenticatedGuard, ClientTokens } from '@app/shared-lib';
+import {
+  AuthenticatedGuard,
+  ClientTokens,
+  ChatSpaceDto,
+} from '@app/shared-lib';
 import { IUser } from '@app/shared-lib/interfaces';
 import {
   Body,
@@ -6,13 +10,14 @@ import {
   Delete,
   Get,
   Inject,
+  NotFoundException,
   Param,
   Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { map, switchMap } from 'rxjs';
 import { User } from '../decorators';
 
 @UseGuards(AuthenticatedGuard)
@@ -26,56 +31,66 @@ export class ChatController {
     @Inject(ClientTokens.USER) private userClient: ClientProxy,
   ) {}
 
-  // @Post()
-  // createChatRoom(@Body() chatRoomDto: ChatRoomDto, @User() user: RIUser) {
-  //   const payload = {
-  //     userId: user.sub,
-  //     ...chatRoomDto,
-  //   };
-  //   return this.chatClient.send({ cmd: 'add-chat-room' }, payload).pipe(
-  //     map((value) => ({ chatRoomId: value.id, userId: user.sub })),
-  //     switchMap((value) =>
-  //       this.userClient.send({ cmd: 'add-chat-room' }, { ...value }),
-  //     ),
-  //   );
-  // }
+  @Post()
+  createChatSpace(@Body() chatSpaceDto: ChatSpaceDto, @User() user: IUser) {
+    const payload = {
+      userId: user._id,
+      ...chatSpaceDto,
+    };
 
-  @Get()
-  findAllChatRooms(@User() user: IUser) {
-    return this.userClient
-      .send({ cmd: 'find-by-id' }, user._id)
+    return this.chatClient
+      .send({ cmd: 'add-chat-space' }, payload)
       .pipe(
-        switchMap((value) =>
-          this.chatClient.send(
-            { cmd: 'get-chat-rooms' },
-            { chatRoomIds: value.chatRooms },
-          ),
+        switchMap(({ chatSpace }) =>
+          this.userClient
+            .send(
+              { cmd: 'add-chat-space' },
+              { chatSpaceId: chatSpace.id, userId: user._id },
+            )
+            .pipe(map(() => chatSpace)),
         ),
       );
   }
 
-  // @Delete(':id')
-  // deleteChatRoom(@Param('id') roomId: string, @User() user: RIUser) {
-  //   return this.chatClient.send({ cmd: 'delete-chat-room' }, { roomId }).pipe(
-  //     switchMap(({ error }) => {
-  //       if (error) return error;
+  @Get()
+  findAllChatSpaces(@User() user: IUser) {
+    return this.chatClient.send(
+      { cmd: 'get-chat-space' },
+      { chatRoomIds: user.chatSpaces },
+    );
+  }
 
-  //       this.userClient.send(
-  //         { cmd: 'delete-chat-room' },
-  //         { roomId, userId: user.sub },
-  //       );
-  //     }),
-  //   );
-  // }
+  @Delete(':id')
+  deleteChatSpace(@Param('id') chatSpaceId: string, @User() user: IUser) {
+    return this.chatClient
+      .send({ cmd: 'delete-chat-space' }, { chatSpaceId })
+      .pipe(
+        switchMap(({ message, error }) => {
+          if (error) throw new NotFoundException(error);
 
-  // @Patch(':id')
-  // updateChatRoom(@Param('id') roomId: string, @Body('name') name: ChatRoomDto) {
-  //   return this.chatClient.send({ cmd: 'update-chat-room' }, { roomId, name });
-  // }
+          return this.userClient
+            .send(
+              { cmd: 'delete-chat-space' },
+              { chatSpaceId, userId: user._id },
+            )
+            .pipe(map(() => message));
+        }),
+      );
+  }
 
-  // // testing send roomid to get all messages with room
-  // @Get(':id')
-  // findOne(@Param('id') roomId: string) {
-  //   return this.chatClient.send({ cmd: 'find-chat-room' }, { roomId });
-  // }
+  @Patch(':id')
+  updateChatSpace(
+    @Param('id') chatSpaceId: string,
+    @Body('name') name: string,
+  ) {
+    return this.chatClient.send(
+      { cmd: 'update-chat-chat-space' },
+      { chatSpaceId, name },
+    );
+  }
+
+  @Get(':id')
+  findOne(@Param('id') chatSpaceId: string) {
+    return this.chatClient.send({ cmd: 'find-chat-space' }, { chatSpaceId });
+  }
 }

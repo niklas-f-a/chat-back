@@ -58,4 +58,24 @@ export class UserController {
     const { email, select } = payload;
     return await this.userService.findOneByEmail(email, select);
   }
+
+  @MessagePattern({ cmd: 'add-chat-space' })
+  addChatSpace(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { chatSpaceId: string; userId: string },
+  ) {
+    this.sharedService.rabbitAck(context);
+    const { chatSpaceId, userId } = payload;
+    return this.userService.addChatSpace(userId, chatSpaceId);
+  }
+
+  @MessagePattern({ cmd: 'delete-chat-space' })
+  deleteChatSpace(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { chatSpaceId: string; userId: string },
+  ) {
+    this.sharedService.rabbitAck(context);
+
+    return this.userService.deleteChatSpace(payload);
+  }
 }

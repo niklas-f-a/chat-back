@@ -43,4 +43,24 @@ export class UserService {
   async findOneByEmail(email: string, select?: string) {
     return await this.userRepository.findOne({ email }, select);
   }
+
+  async addChatSpace(userId: string, chatSpaceId: string) {
+    const user = await this.userRepository.findById(userId);
+    user?.chatSpaces.push(chatSpaceId);
+    return user?.save();
+  }
+
+  async deleteChatSpace({
+    chatSpaceId,
+    userId,
+  }: {
+    chatSpaceId: string;
+    userId: string;
+  }) {
+    const user = await this.findById(userId);
+    if (!user) throw new RpcException('User not found');
+
+    user.chatSpaces = user?.chatSpaces.filter((id) => id !== chatSpaceId);
+    return user.save();
+  }
 }

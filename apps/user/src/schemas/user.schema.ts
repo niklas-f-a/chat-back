@@ -27,7 +27,7 @@ export class User {
   photos: { value: string }[];
 
   @Prop()
-  chatRooms: number[];
+  chatSpaces: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -24,7 +24,7 @@ export class Message extends Model {
   updateAt: Date;
 
   @ForeignKey(() => ChatRoom)
-  roomId: number;
+  roomId: ChatRoom;
 
   @BelongsTo(() => ChatRoom)
   room: ChatRoom;

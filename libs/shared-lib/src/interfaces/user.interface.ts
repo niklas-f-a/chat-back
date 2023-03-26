@@ -10,5 +10,5 @@ export interface IUser {
   password?: string;
   githubId?: string;
   photos: { value: string }[];
-  chatRooms: number[];
+  chatSpaces: string[];
 }

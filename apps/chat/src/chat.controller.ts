@@ -1,5 +1,8 @@
-import { ServiceTokens, SharedService } from '@app/shared-lib';
-// import { ChatRoomDto } from '@app/shared/dto';
+import {
+  ChatSpacePayload,
+  ServiceTokens,
+  SharedService,
+} from '@app/shared-lib';
 import { Controller, Inject } from '@nestjs/common';
 import {
   Ctx,
@@ -15,49 +18,50 @@ export class ChatController {
     @Inject(ServiceTokens.CHAT) private chatService: ChatService,
     private readonly sharedService: SharedService,
   ) {}
-  //   @MessagePattern({ cmd: 'add-chat-room' })
-  //   createChatRoom(
-  //     @Payload() chatRoomDto: ChatRoomDto,
-  //     @Ctx() context: RmqContext,
-  //   ) {
-  //     this.sharedService.rabbitAck(context);
-  //     const newChatRoom = this.chatService.createChatRoom(chatRoomDto);
-  //     // emit to WS
-  //     return newChatRoom;
-  //   }
-  @MessagePattern({ cmd: 'get-chat-rooms' })
-  getAllChatRooms(
+  @MessagePattern({ cmd: 'add-chat-space' })
+  createChatRoom(
+    @Payload() chatSpacePayload: ChatSpacePayload,
+    @Ctx() context: RmqContext,
+  ) {
+    this.sharedService.rabbitAck(context);
+    const newChatSpace = this.chatService.createChatSpace(chatSpacePayload);
+    // emit to WS
+    return newChatSpace;
+  }
+
+  @MessagePattern({ cmd: 'get-chat-space' })
+  getAllChatSpaces(
     @Payload('chatRoomIds') chatRoomIds: string[],
     @Ctx() context: RmqContext,
   ) {
     this.sharedService.rabbitAck(context);
-    console.log(chatRoomIds);
-    return this.chatService.getAllChatRooms(chatRoomIds);
+    return this.chatService.getAllChatSpaces(chatRoomIds);
   }
-  //   @MessagePattern({ cmd: 'post-message' })
-  //   postMessage(@Ctx() context: RmqContext) {
-  //     this.sharedService.rabbitAck(context);
-  //     return this.chatService.addMessage();
-  //   }
-  //   @MessagePattern({ cmd: 'find-chat-room' })
-  //   findOneChatRoom(
-  //     @Payload('roomId') roomId: string,
-  //     @Ctx() context: RmqContext,
-  //   ) {
-  //     this.sharedService.rabbitAck(context);
-  //     return this.chatService.findOneChatRoom(roomId);
-  //   }
-  //   @MessagePattern({ cmd: 'delete-chat-room' })
-  //   async deleteChatRoom(
-  //     @Payload('roomId') roomId: string,
-  //     @Ctx() context: RmqContext,
-  //   ) {
-  //     this.sharedService.rabbitAck(context);
-  //     return await this.chatService.deleteChatRoom(roomId);
-  //   }
-  //   @MessagePattern({ cmd: 'update-chat-room' })
-  //   async updateChatRoom(@Payload() payload: any, @Ctx() context: RmqContext) {
-  //     this.sharedService.rabbitAck(context);
-  //     return await this.chatService.updateChatRoom(payload);
-  //   }
+
+  @MessagePattern({ cmd: 'find-chat-space' })
+  findOneChatSpaces(
+    @Payload('roomId') chatSpaceId: string,
+    @Ctx() context: RmqContext,
+  ) {
+    this.sharedService.rabbitAck(context);
+    return this.chatService.findOneChatSpace(chatSpaceId);
+  }
+
+  @MessagePattern({ cmd: 'delete-chat-space' })
+  async deleteChatSpace(
+    @Payload('chatSpaceId') chatSpaceId: string,
+    @Ctx() context: RmqContext,
+  ) {
+    this.sharedService.rabbitAck(context);
+    return await this.chatService.deleteChatSpace(chatSpaceId);
+  }
+
+  @MessagePattern({ cmd: 'update-chat-chat-space' })
+  async updateChatSpace(
+    @Payload() payload: { chatSpaceId: string; name: string },
+    @Ctx() context: RmqContext,
+  ) {
+    this.sharedService.rabbitAck(context);
+    return await this.chatService.updateChatSpace(payload);
+  }
 }
