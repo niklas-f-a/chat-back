@@ -29,7 +29,7 @@ export class ChatService {
 
   getAllChatSpaces(chatSpaceIds: string[]) {
     return from(chatSpaceIds).pipe(
-      concatMap((value) => this.chatSpaceModel.findByPk(value)),
+      concatMap((value) => this.findOneChatSpace(value)),
       toArray(),
       catchError((error) => {
         throw new RpcException(error.message);
@@ -37,8 +37,10 @@ export class ChatService {
     );
   }
 
-  findOneChatSpace(chatRoomId: string) {
-    return this.chatSpaceModel.findByPk(chatRoomId);
+  async findOneChatSpace(chatRoomId: string) {
+    return this.chatSpaceModel.findByPk(chatRoomId, {
+      include: ChatRoom,
+    });
   }
 
   async deleteChatSpace(chatSpaceId: string) {

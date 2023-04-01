@@ -41,13 +41,13 @@ export class ChatController {
     return this.chatClient
       .send({ cmd: 'add-chat-space' }, payload)
       .pipe(
-        switchMap(({ chatSpace }) =>
+        switchMap((value) =>
           this.userClient
             .send(
               { cmd: 'add-chat-space' },
-              { chatSpaceId: chatSpace.id, userId: user._id },
+              { chatSpaceId: value.chatSpace.id, userId: user._id },
             )
-            .pipe(map(() => chatSpace)),
+            .pipe(map(() => value)),
         ),
       );
   }

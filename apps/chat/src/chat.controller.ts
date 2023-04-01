@@ -19,14 +19,12 @@ export class ChatController {
     private readonly sharedService: SharedService,
   ) {}
   @MessagePattern({ cmd: 'add-chat-space' })
-  createChatRoom(
+  async createChatRoom(
     @Payload() chatSpacePayload: ChatSpacePayload,
     @Ctx() context: RmqContext,
   ) {
     this.sharedService.rabbitAck(context);
-    const newChatSpace = this.chatService.createChatSpace(chatSpacePayload);
-    // emit to WS
-    return newChatSpace;
+    return this.chatService.createChatSpace(chatSpacePayload);
   }
 
   @MessagePattern({ cmd: 'get-chat-space' })
