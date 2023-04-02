@@ -74,4 +74,15 @@ export class ChatService {
     chatSpace.name = name;
     return chatSpace?.save();
   }
+
+  async getRoomById(id: string) {
+    try {
+      const room = await this.chatRoomModel.findByPk(id, { include: Message });
+      if (!room) throw new RpcException('Not found');
+
+      return room;
+    } catch (error) {
+      throw new RpcException('Not Found');
+    }
+  }
 }

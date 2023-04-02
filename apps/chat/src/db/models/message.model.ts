@@ -12,7 +12,7 @@ import { ChatRoom } from '.';
 @Table
 export class Message extends Model {
   @Column
-  message: string;
+  content: string;
 
   @Column
   userId: number;

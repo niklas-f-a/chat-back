@@ -17,7 +17,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { map, switchMap } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs';
 import { User } from '../decorators';
 
 @UseGuards(AuthenticatedGuard)
@@ -92,5 +92,14 @@ export class ChatController {
   @Get(':id')
   findOne(@Param('id') chatSpaceId: string) {
     return this.chatClient.send({ cmd: 'find-chat-space' }, { chatSpaceId });
+  }
+
+  @Get('rooms/:id')
+  getRoom(@Param('id') chatRoomId: string) {
+    return this.chatClient.send({ cmd: 'get-chat-room' }, chatRoomId).pipe(
+      catchError(() => {
+        throw new NotFoundException();
+      }),
+    );
   }
 }
