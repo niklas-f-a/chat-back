@@ -28,15 +28,6 @@ async function bootstrap() {
     secret: string;
   };
 
-  const store =
-    process.env.NODE_ENV === 'production'
-      ? makeStore({
-          uri: mongoCred.uri,
-          collection: sessionCred.collection,
-          sess: session,
-        })
-      : undefined;
-
   app.use(
     session({
       secret: sessionCred.secret,
@@ -45,7 +36,11 @@ async function bootstrap() {
       },
       resave: false,
       saveUninitialized: false,
-      store,
+      store: makeStore({
+        uri: mongoCred.uri,
+        collection: sessionCred.collection,
+        sess: session,
+      }),
     }),
   );
 

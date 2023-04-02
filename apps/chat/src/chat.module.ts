@@ -13,17 +13,17 @@ import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { dbConnection } from './db/connection';
 import { ChatRoom, ChatSpace, Message } from './db/models';
-import { GatewayModule } from './gateway/gateway.module';
+import { ChatGateway } from './chat.gateway';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
-    GatewayModule,
     SequelizeModule.forFeature([ChatRoom, Message, ChatSpace]),
     ...dbConnection,
   ],
   controllers: [ChatController],
   providers: [
+    ChatGateway,
     SharedService,
     { provide: ServiceTokens.CHAT, useClass: ChatService },
     rabbitProvider(ClientTokens.USER, RabbitQueue.USER),

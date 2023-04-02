@@ -2,9 +2,9 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ChatModule } from './chat.module';
-// import { IOAdapter } from './IO.adabter';
+import { IOAdapter } from './IOAdapter';
 import * as session from 'express-session';
-// import { makeMongo } from '@app/shared/providers';
+import { makeStore } from '@app/shared-lib';
 
 async function bootstrap() {
   const app = await NestFactory.create(ChatModule);
@@ -29,23 +29,22 @@ async function bootstrap() {
     },
   });
 
-  // const sess = session({
-  //   secret: sessionCred.secret,
-  //   cookie: {
-  //     maxAge: 1000 * 60 * 60 * 24, // 1 day
-  //   },
-  //   resave: false,
-  //   saveUninitialized: false,
-  //   store: makeMongo({
-  //     uri: mongoCred.uri,
-  //     collection: sessionCred.collection,
-  //     session,
-  //   }),
-  // });
-
-  // app.useWebSocketAdapter(new IOAdapter(app, sess));
+  const sess = session({
+    secret: sessionCred.secret,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    },
+    resave: false,
+    saveUninitialized: false,
+    store: makeStore({
+      uri: mongoCred.uri,
+      collection: sessionCred.collection,
+      sess: session,
+    }),
+  });
 
   app.startAllMicroservices();
   app.listen(5050);
+  app.useWebSocketAdapter(new IOAdapter(app, sess));
 }
 bootstrap();
