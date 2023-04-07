@@ -1,11 +1,17 @@
 import { ClientTokens } from '@app/shared-lib';
-import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NestMiddleware,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NextFunction, Request, Response } from 'express';
 import { firstValueFrom, map } from 'rxjs';
 
 export interface IRequest extends Request {
   isLoggedIn: () => boolean;
+  myLogout: () => any;
 }
 
 @Injectable()
@@ -13,7 +19,7 @@ export class RequestUser implements NestMiddleware {
   constructor(
     @Inject(ClientTokens.USER) private readonly userClient: ClientProxy,
   ) {}
-  async use(req: Request, _: Response, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction) {
     const { userId } = req?.session as unknown as Record<string, string>;
     if (userId) {
       const user = await firstValueFrom(
@@ -24,7 +30,13 @@ export class RequestUser implements NestMiddleware {
 
       req['user'] = user;
     }
-    (req as IRequest).isLoggedIn = () => !!req?.user;
+    req.isLoggedIn = () => !!req?.user;
+    req.myLogout = () =>
+      req?.session?.destroy((err) => {
+        if (err) throw new InternalServerErrorException();
+        delete req?.user;
+        res.clearCookie('connect.sid').send({ message: 'logged out' });
+      });
 
     next();
   }

@@ -1,14 +1,17 @@
 import { ClientTokens } from '@app/shared-lib';
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Controller,
   ForbiddenException,
   Get,
   Inject,
+  InternalServerErrorException,
   Post,
   Redirect,
   Req,
+  Res,
   Session,
   UseGuards,
 } from '@nestjs/common';
@@ -18,7 +21,7 @@ import { LoginDto, SignupDto } from '../../../../libs/shared-lib/src/dto';
 import { GithubAuthGuard } from '../guards';
 import { AuthenticatedGuard } from '../../../../libs/shared-lib/src/guards/authenticated.guard';
 import { IUser } from '@app/shared-lib/interfaces';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @Controller({
   version: '1',
@@ -74,7 +77,21 @@ export class AuthController {
 
   @UseGuards(AuthenticatedGuard)
   @Get('status')
-  status(@Session() session: Record<string, any>, @Req() req: Request) {
+  status(@Req() req: Request) {
     return req?.user;
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Post('logout')
+  logout(@Req() req: Request, @Res() res: Response) {
+    return req.isAuthenticated()
+      ? req.logOut((err) => {
+          if (err) throw new BadRequestException();
+          req.session.destroy((error) => {
+            if (error) throw new InternalServerErrorException();
+            res.clearCookie('connect.sid').send({ message: 'logged out' });
+          });
+        })
+      : req?.myLogout?.();
   }
 }
