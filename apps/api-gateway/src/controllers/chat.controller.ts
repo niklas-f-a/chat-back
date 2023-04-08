@@ -5,6 +5,7 @@ import {
 } from '@app/shared-lib';
 import { IUser } from '@app/shared-lib/interfaces';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -30,6 +31,23 @@ export class ChatController {
     @Inject(ClientTokens.CHAT) private chatClient: ClientProxy,
     @Inject(ClientTokens.USER) private userClient: ClientProxy,
   ) {}
+
+  @Post('join')
+  joinRoom(@Body('chatSpaceId') chatSpaceId: string, @User() user: IUser) {
+    return this.userClient
+      .send({ cmd: 'join-room' }, { chatSpaceId, userId: user._id })
+      .pipe(
+        switchMap(() =>
+          this.chatClient.send(
+            { cmd: 'find-chat-space' },
+            { roomId: chatSpaceId },
+          ),
+        ),
+        catchError(() => {
+          throw new BadRequestException();
+        }),
+      );
+  }
 
   @Post()
   createChatSpace(@Body() chatSpaceDto: ChatSpaceDto, @User() user: IUser) {

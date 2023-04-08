@@ -21,7 +21,24 @@ export class UserService {
     return newUser;
   }
 
-  async findByGithubId(githubId: string | undefined) {
+  async joinRoom({
+    userId,
+    chatSpaceId,
+  }: {
+    userId: string;
+    chatSpaceId: string;
+  }) {
+    const user = await this.userRepository.findById(userId);
+    const spaceExist = user?.chatSpaces.find(
+      (spaceId) => spaceId === chatSpaceId,
+    );
+    if (spaceExist) return user;
+
+    user?.chatSpaces.push(chatSpaceId);
+    return user?.save();
+  }
+
+  async findByGithubId(githubId?: string) {
     return await this.userRepository.findOne({
       githubId,
     });

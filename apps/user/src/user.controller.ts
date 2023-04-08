@@ -31,6 +31,16 @@ export class UserController {
     return this.userService.findByGithubId(userId);
   }
 
+  @MessagePattern({ cmd: 'join-room' })
+  joinRoom(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { userId: string; chatSpaceId: string },
+  ) {
+    this.sharedService.rabbitAck(context);
+
+    return this.userService.joinRoom(payload);
+  }
+
   @MessagePattern({ cmd: 'find-or-create-github-user' })
   async findByGithubIdOrCreate(
     @Ctx() context: RmqContext,
