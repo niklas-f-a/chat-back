@@ -18,8 +18,8 @@ import { ChatGateway } from './chat.gateway';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
-    SequelizeModule.forFeature([ChatRoom, Message, ChatSpace]),
     ...dbConnection,
+    SequelizeModule.forFeature([ChatRoom, Message, ChatSpace]),
   ],
   controllers: [ChatController],
   providers: [

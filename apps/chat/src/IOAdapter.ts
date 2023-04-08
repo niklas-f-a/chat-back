@@ -3,9 +3,8 @@ import { Server } from 'socket.io';
 import * as sharedsession from 'express-socket.io-session';
 import { ForbiddenException, INestApplication } from '@nestjs/common';
 import { RequestHandler } from 'express';
-import { Session } from 'express-session';
 import { ClientTokens } from '@app/shared-lib';
-import { firstValueFrom, map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { User } from 'apps/user/src/schemas';
 
 export class IOAdapter extends IoAdapter {
@@ -15,7 +14,6 @@ export class IOAdapter extends IoAdapter {
 
   findUser(id: string) {
     const userClient = this.app.get(ClientTokens.USER);
-    // find user from github id also
     return firstValueFrom<User>(userClient.send({ cmd: 'find-by-id' }, id));
   }
 
@@ -30,10 +28,14 @@ export class IOAdapter extends IoAdapter {
 
     server.use(async (socket, next) => {
       const session = (socket.handshake as any).session as any;
+      const id = session?.userId ?? session?.passport?.user?._id;
+
       try {
-        if (!session?.userId) throw new ForbiddenException();
-        const user = await this.findUser(session?.userId);
+        if (!id) throw new ForbiddenException();
+
+        const user = await this.findUser(id);
         if (!user) throw new ForbiddenException();
+
         socket.handshake.auth = user;
         next();
       } catch {

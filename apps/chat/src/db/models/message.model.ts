@@ -15,7 +15,7 @@ export class Message extends Model {
   content: string;
 
   @Column
-  userId: number;
+  userId: string;
 
   @CreatedAt
   createdAt: Date;

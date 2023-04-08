@@ -1,14 +1,15 @@
 import { Inject, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import {
+  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 // import { AuthenticatedGuard } from 'apps/auth/src/guards';
-import { Server } from 'socket.io';
-import { ChatSpace } from './db/models';
+import { Server, Socket } from 'socket.io';
+import { ChatRoom, ChatSpace } from './db/models';
 import { ChatService } from './chat.service';
 import { ServiceTokens } from '@app/shared-lib';
 import { from, of, switchMap, tap } from 'rxjs';
@@ -23,23 +24,31 @@ export class ChatGateway implements OnModuleInit {
   constructor(@Inject(ServiceTokens.CHAT) private chatService: ChatService) {}
   @WebSocketServer()
   server: Server;
+  socket: Socket;
 
   onModuleInit() {
     this.server.on('connection', async (socket) => {
       console.log('connected');
+      this.socket = socket;
       const spaceIds = socket.handshake.auth.chatSpaces;
       const chatSpacePromises = spaceIds.map((spaceId: string) =>
         this.chatService.findOneChatSpace(spaceId),
       );
-      const space = await this.chatService.findOneChatSpace(spaceIds[0]);
-      console.log(space?.chatRooms);
-      // console.log(socket.handshake);
+      const spaces = await Promise.all(chatSpacePromises);
+      spaces.forEach((space) => {
+        space.chatRooms.forEach((room: ChatRoom) => {
+          socket.join(room.id.toString());
+        });
+      });
     });
   }
 
-  @SubscribeMessage('sendMessage')
-  sendMessage(@MessageBody() body: any) {
-    // console.log(body);
-    this.server.emit('pong');
+  @SubscribeMessage('send-message')
+  async sendMessage(@MessageBody() data: { roomId: number; content: string }) {
+    const userId = this.socket.handshake.auth._id as string;
+    const message = await this.chatService.addMessage({ ...data, userId });
+    console.log(message);
+
+    this.server.to(data.roomId.toString()).emit('received-message', message);
   }
 }

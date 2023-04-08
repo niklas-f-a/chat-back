@@ -64,8 +64,17 @@ export class ChatController {
   }
 
   @MessagePattern({ cmd: 'get-chat-room' })
-  findChatRoomById(@Ctx() context: RmqContext, @Payload() id: string) {
+  findChatRoomById(@Ctx() context: RmqContext, @Payload() id: number) {
     this.sharedService.rabbitAck(context);
     return this.chatService.getRoomById(id);
+  }
+
+  @MessagePattern({ cmd: 'add-message' })
+  addMessage(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { roomId: number; userId: string; content: string },
+  ) {
+    this.sharedService.rabbitAck(context);
+    return this.chatService.addMessage(payload);
   }
 }

@@ -2,9 +2,9 @@
 import { ChatSpacePayload } from '@app/shared-lib';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { InjectModel } from '@nestjs/sequelize';
 import { catchError, concatMap, from, toArray } from 'rxjs';
 import { ChatRoom, ChatSpace, Message } from './db/models';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class ChatService {
@@ -75,7 +75,7 @@ export class ChatService {
     return chatSpace?.save();
   }
 
-  async getRoomById(id: string) {
+  async getRoomById(id: number) {
     try {
       const room = await this.chatRoomModel.findByPk(id, { include: Message });
       if (!room) throw new RpcException('Not found');
@@ -83,6 +83,25 @@ export class ChatService {
       return room;
     } catch (error) {
       throw new RpcException('Not Found');
+    }
+  }
+
+  async addMessage(data: { roomId: number; userId: string; content: string }) {
+    const { roomId, userId, content } = data;
+    try {
+      const room = await this.getRoomById(data.roomId);
+
+      const message = await this.messageModel.create({
+        userId,
+        content,
+        roomId,
+      });
+      room.messages.push(message);
+      await room.save();
+
+      return message;
+    } catch (error) {
+      console.log(error);
     }
   }
 }
