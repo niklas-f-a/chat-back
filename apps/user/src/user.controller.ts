@@ -51,6 +51,16 @@ export class UserController {
     return this.userService.joinRoom(payload);
   }
 
+  @MessagePattern({ cmd: 'add-friend' })
+  addFriend(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { requester: string; receiver: string },
+  ) {
+    this.sharedService.rabbitAck(context);
+
+    return this.userService.addFriend(payload);
+  }
+
   @MessagePattern({ cmd: 'find-or-create-github-user' })
   async findByGithubIdOrCreate(
     @Ctx() context: RmqContext,

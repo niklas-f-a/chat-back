@@ -3,6 +3,12 @@ import { HydratedDocument, ObjectId } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
+type FriendRequests = {
+  requester: string;
+  receiver: string;
+  established: boolean;
+};
+
 @Schema()
 export class User {
   _id?: ObjectId;
@@ -31,6 +37,9 @@ export class User {
 
   @Prop()
   chatSpaces: string[];
+
+  @Prop({ required: false, default: [], type: Array })
+  friendRequests: FriendRequests[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -1,6 +1,16 @@
 import { AuthenticatedGuard, ClientTokens } from '@app/shared-lib';
-import { Controller, Get, Inject, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { User } from '../decorators';
+import { IUser } from '@app/shared-lib/interfaces';
 
 @UseGuards(AuthenticatedGuard)
 @Controller({
@@ -12,8 +22,14 @@ export class UserController {
 
   @Get('search')
   searchForUser(@Query() query: { users: string; skip?: number }) {
-    console.log(query);
-
     return this.userClient.send({ cmd: 'search-for-user' }, query);
+  }
+
+  @Post('friend-request')
+  addFriendRequest(@Body('receiver') receiver: string, @User() user: IUser) {
+    return this.userClient.send(
+      { cmd: 'add-friend' },
+      { requester: user._id, receiver },
+    );
   }
 }

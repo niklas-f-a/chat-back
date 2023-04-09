@@ -11,6 +11,40 @@ export class UserService {
     private readonly userRepository: UsersRepository,
   ) {}
 
+  async addFriend({
+    requester,
+    receiver,
+  }: {
+    requester: string;
+    receiver: string;
+  }) {
+    const receivingUser = await this.findById(receiver);
+    const requestingUser = await this.findById(requester);
+
+    if (!receivingUser || !requestingUser)
+      throw new RpcException('Something went wrong');
+
+    const friendRequest = {
+      receiver,
+      requester,
+      established: false,
+    };
+    console.log(requestingUser);
+    console.log(receivingUser);
+
+    requestingUser?.friendRequests?.push(friendRequest);
+    receivingUser?.friendRequests?.push(friendRequest);
+
+    console.log(requestingUser);
+    console.log(receivingUser);
+    await requestingUser?.save();
+    await receivingUser?.save();
+    console.log(requestingUser);
+    console.log(receivingUser);
+
+    return requestingUser;
+  }
+
   async create(credentials: SignupDto) {
     const userExist = await this.findOneByEmail(credentials.email);
     if (userExist) throw new RpcException('email already exist');
@@ -36,8 +70,6 @@ export class UserService {
   }
 
   async searchForUser(term: string, skip = 0) {
-    console.log(term);
-
     return this.userRepository.find(
       {
         $or: [
@@ -48,6 +80,7 @@ export class UserService {
       {
         limit: 10,
         skip,
+        select: 'username',
       },
     );
   }

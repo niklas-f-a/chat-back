@@ -24,6 +24,7 @@ export abstract class BaseRepository<T> {
       .find(filter)
       .limit(options?.limit ?? 10)
       .skip(options?.skip ?? 0)
+      .select(options?.select)
       .exec();
   }
 }
