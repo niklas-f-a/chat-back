@@ -3,6 +3,7 @@ import { UsersRepository } from 'apps/user/src/repositories';
 import { Inject, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { IUser } from '@app/shared-lib/interfaces';
+import { User } from './schemas';
 
 @Injectable()
 export class UserService {
@@ -25,24 +26,34 @@ export class UserService {
       throw new RpcException('Something went wrong');
 
     const friendRequest = {
-      receiver,
-      requester,
+      receiver: {
+        _id: receivingUser._id.toString(),
+        username: receivingUser.username,
+      },
+      requester: {
+        _id: requestingUser._id.toString(),
+        username: requestingUser.username,
+      },
       established: false,
+      created: new Date(),
     };
-    console.log(requestingUser);
-    console.log(receivingUser);
 
     requestingUser?.friendRequests?.push(friendRequest);
     receivingUser?.friendRequests?.push(friendRequest);
 
-    console.log(requestingUser);
-    console.log(receivingUser);
+    requestingUser.markModified('friendRequests');
+    receivingUser.markModified('friendRequests');
+
     await requestingUser?.save();
     await receivingUser?.save();
-    console.log(requestingUser);
-    console.log(receivingUser);
 
-    return requestingUser;
+    return requestingUser.friendRequests;
+  }
+
+  async getFriends(userId: string) {
+    const user = await this.findById(userId);
+
+    return user?.friendRequests;
   }
 
   async create(credentials: SignupDto) {
@@ -108,18 +119,17 @@ export class UserService {
     });
   }
 
-  async findByGithubIdOrCreate(user: IUser) {
+  async findByGithubIdOrCreate(user: User) {
     const foundUser = await this.findByGithubId(user.githubId);
     if (foundUser) return foundUser;
-    console.log(user);
 
     return await this.userRepository.create(user);
   }
 
-  async findById(userId: string) {
+  async findById(userId: string, select?: string) {
     if (!userId) throw new RpcException('No user id provided');
 
-    return await this.userRepository.findById(userId);
+    return await this.userRepository.findById(userId, { select });
   }
 
   async findOneByEmail(email: string, select?: string) {

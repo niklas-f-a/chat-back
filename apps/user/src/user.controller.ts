@@ -9,6 +9,7 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { UserService } from './user.service';
+import { User } from './schemas';
 
 @Controller()
 export class UserController {
@@ -41,6 +42,13 @@ export class UserController {
     return this.userService.searchForUser(users, skip);
   }
 
+  @MessagePattern({ cmd: 'get-friends' })
+  getFriends(@Ctx() context: RmqContext, @Payload('userId') userId: string) {
+    this.sharedService.rabbitAck(context);
+
+    return this.userService.getFriends(userId);
+  }
+
   @MessagePattern({ cmd: 'join-room' })
   joinRoom(
     @Ctx() context: RmqContext,
@@ -64,7 +72,7 @@ export class UserController {
   @MessagePattern({ cmd: 'find-or-create-github-user' })
   async findByGithubIdOrCreate(
     @Ctx() context: RmqContext,
-    @Payload() user: IUser,
+    @Payload() user: User,
   ) {
     this.sharedService.rabbitAck(context);
 

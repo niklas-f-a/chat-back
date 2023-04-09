@@ -4,6 +4,18 @@ import { IBaseRepository } from '../../../../apps/user/src/repositories/base';
 
 export type UserRepositoryInterface = IBaseRepository<UserDocument>;
 
+type FriendRequests = {
+  requester: {
+    _id: string;
+    username: string;
+  };
+  receiver: {
+    _id: string;
+    username: string;
+  };
+  established: boolean;
+  created: Date;
+};
 export interface IUser {
   _id?: ObjectId;
   email: string;
@@ -11,4 +23,5 @@ export interface IUser {
   githubId?: string;
   photos: { value: string }[];
   chatSpaces: string[];
+  friendRequests?: FriendRequests[];
 }

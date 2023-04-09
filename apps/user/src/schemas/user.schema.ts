@@ -4,9 +4,16 @@ import { HydratedDocument, ObjectId } from 'mongoose';
 export type UserDocument = HydratedDocument<User>;
 
 type FriendRequests = {
-  requester: string;
-  receiver: string;
+  requester: {
+    _id: string;
+    username: string;
+  };
+  receiver: {
+    _id: string;
+    username: string;
+  };
   established: boolean;
+  created: Date;
 };
 
 @Schema()
@@ -39,7 +46,7 @@ export class User {
   chatSpaces: string[];
 
   @Prop({ required: false, default: [], type: Array })
-  friendRequests: FriendRequests[];
+  friendRequests?: FriendRequests[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

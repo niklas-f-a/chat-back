@@ -15,8 +15,8 @@ export abstract class BaseRepository<T> {
     return await this.entity.findOne(condition).select(select).exec();
   }
 
-  public async findById(id: string) {
-    return await this.entity.findById(id);
+  public async findById(id: string, options?: QueryOptions<T>) {
+    return await this.entity.findById(id).select(options?.select).exec();
   }
 
   public async find(filter: FilterQuery<T>, options?: QueryOptions<T>) {

@@ -1,5 +1,6 @@
 import { AuthenticatedGuard, ClientTokens } from '@app/shared-lib';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -11,6 +12,7 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { User } from '../decorators';
 import { IUser } from '@app/shared-lib/interfaces';
+import { catchError } from 'rxjs';
 
 @UseGuards(AuthenticatedGuard)
 @Controller({
@@ -27,9 +29,17 @@ export class UserController {
 
   @Post('friend-request')
   addFriendRequest(@Body('receiver') receiver: string, @User() user: IUser) {
-    return this.userClient.send(
-      { cmd: 'add-friend' },
-      { requester: user._id, receiver },
-    );
+    return this.userClient
+      .send({ cmd: 'add-friend' }, { requester: user._id, receiver })
+      .pipe(
+        catchError(() => {
+          throw new BadRequestException();
+        }),
+      );
+  }
+
+  @Get('friends')
+  getFriends(@User() user: IUser) {
+    return this.userClient.send({ cmd: 'get-friends' }, { userId: user._id });
   }
 }
