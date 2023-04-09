@@ -32,10 +32,13 @@ export class UserController {
   }
 
   @MessagePattern({ cmd: 'search-for-user' })
-  searchForUser(@Ctx() context: RmqContext, @Payload() searchTerm: string) {
+  searchForUser(
+    @Ctx() context: RmqContext,
+    @Payload() { skip, users }: { skip: number; users: string },
+  ) {
     this.sharedService.rabbitAck(context);
 
-    return this.userService.searchForUser(searchTerm);
+    return this.userService.searchForUser(users, skip);
   }
 
   @MessagePattern({ cmd: 'join-room' })
@@ -54,7 +57,6 @@ export class UserController {
     @Payload() user: IUser,
   ) {
     this.sharedService.rabbitAck(context);
-    console.log(user);
 
     return await this.userService.findByGithubIdOrCreate(user);
   }

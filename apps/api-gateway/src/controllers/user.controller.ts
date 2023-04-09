@@ -1,17 +1,19 @@
 import { AuthenticatedGuard, ClientTokens } from '@app/shared-lib';
-import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Query, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
 @UseGuards(AuthenticatedGuard)
 @Controller({
   version: '1',
-  path: 'USER',
+  path: 'users',
 })
 export class UserController {
   constructor(@Inject(ClientTokens.USER) private userClient: ClientProxy) {}
 
-  @Post('search')
-  searchForUser(@Body('searchTerm') searchTerm: string) {
-    return this.userClient.send({ cmd: 'search-for-user' }, searchTerm);
+  @Get('search')
+  searchForUser(@Query() query: { users: string; skip?: number }) {
+    console.log(query);
+
+    return this.userClient.send({ cmd: 'search-for-user' }, query);
   }
 }

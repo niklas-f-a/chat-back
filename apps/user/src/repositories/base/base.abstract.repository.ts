@@ -1,5 +1,5 @@
 // import { IBaseRepository } from '.';
-import { Model, FilterQuery } from 'mongoose';
+import { Model, FilterQuery, QueryOptions } from 'mongoose';
 // implements IBaseRepository<T>
 export abstract class BaseRepository<T> {
   private entity: Model<T>;
@@ -19,7 +19,11 @@ export abstract class BaseRepository<T> {
     return await this.entity.findById(id);
   }
 
-  public async find(filter: FilterQuery<T>) {
-    return await this.entity.find(filter).exec();
+  public async find(filter: FilterQuery<T>, options?: QueryOptions<T>) {
+    return await this.entity
+      .find(filter)
+      .limit(options?.limit ?? 10)
+      .skip(options?.skip ?? 0)
+      .exec();
   }
 }

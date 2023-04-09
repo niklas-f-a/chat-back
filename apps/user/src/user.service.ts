@@ -35,13 +35,21 @@ export class UserService {
     return newUser;
   }
 
-  async searchForUser(term: string) {
-    return this.userRepository.find({
-      $or: [
-        { email: { $regex: '.*' + term + '.*' } },
-        { username: { $regex: '.*' + term + '.*' } },
-      ],
-    });
+  async searchForUser(term: string, skip = 0) {
+    console.log(term);
+
+    return this.userRepository.find(
+      {
+        $or: [
+          { email: { $regex: '.*' + term + '.*' } },
+          { username: { $regex: '.*' + term + '.*' } },
+        ],
+      },
+      {
+        limit: 10,
+        skip,
+      },
+    );
   }
 
   async joinRoom({
