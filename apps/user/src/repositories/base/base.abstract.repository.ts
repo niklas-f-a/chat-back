@@ -18,4 +18,8 @@ export abstract class BaseRepository<T> {
   public async findById(id: string) {
     return await this.entity.findById(id);
   }
+
+  public async find(filter: FilterQuery<T>) {
+    return await this.entity.find(filter).exec();
+  }
 }

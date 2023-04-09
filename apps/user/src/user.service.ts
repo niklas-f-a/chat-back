@@ -21,6 +21,12 @@ export class UserService {
     return newUser;
   }
 
+  async searchForUser(term: string) {
+    return this.userRepository.find({
+      email: { $regex: '.*' + term + '.*' },
+    });
+  }
+
   async joinRoom({
     userId,
     chatSpaceId,

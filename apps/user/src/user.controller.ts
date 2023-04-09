@@ -31,6 +31,13 @@ export class UserController {
     return this.userService.findByGithubId(userId);
   }
 
+  @MessagePattern({ cmd: 'search-for-user' })
+  searchForUser(@Ctx() context: RmqContext, @Payload() searchTerm: string) {
+    this.sharedService.rabbitAck(context);
+
+    return this.userService.searchForUser(searchTerm);
+  }
+
   @MessagePattern({ cmd: 'join-room' })
   joinRoom(
     @Ctx() context: RmqContext,
