@@ -54,6 +54,7 @@ export class UserController {
     @Payload() user: IUser,
   ) {
     this.sharedService.rabbitAck(context);
+    console.log(user);
 
     return await this.userService.findByGithubIdOrCreate(user);
   }

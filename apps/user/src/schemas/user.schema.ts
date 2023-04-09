@@ -13,6 +13,9 @@ export class User {
   @Prop({ select: false })
   password?: string;
 
+  @Prop({ unique: true })
+  username: string;
+
   @Prop({
     required: false,
     index: {

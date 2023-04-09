@@ -14,8 +14,22 @@ export class UserService {
   async create(credentials: SignupDto) {
     const userExist = await this.findOneByEmail(credentials.email);
     if (userExist) throw new RpcException('email already exist');
+    const splittedEmail = credentials.email.split('@')[0];
 
-    const newUser = (await this.userRepository.create(credentials)).toObject();
+    const usersWithName = await this.userRepository.find({
+      username: { $regex: '.*' + splittedEmail + '.*' },
+    });
+
+    const newUserName =
+      splittedEmail +
+      (usersWithName.length > 0 ? `${usersWithName.length + 1}` : '');
+
+    const newUser = (
+      await this.userRepository.create({
+        ...credentials,
+        username: newUserName,
+      })
+    ).toObject();
 
     delete newUser.password;
     return newUser;
@@ -23,7 +37,10 @@ export class UserService {
 
   async searchForUser(term: string) {
     return this.userRepository.find({
-      email: { $regex: '.*' + term + '.*' },
+      $or: [
+        { email: { $regex: '.*' + term + '.*' } },
+        { username: { $regex: '.*' + term + '.*' } },
+      ],
     });
   }
 
@@ -53,6 +70,7 @@ export class UserService {
   async findByGithubIdOrCreate(user: IUser) {
     const foundUser = await this.findByGithubId(user.githubId);
     if (foundUser) return foundUser;
+    console.log(user);
 
     return await this.userRepository.create(user);
   }
