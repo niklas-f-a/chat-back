@@ -1,16 +1,67 @@
 import { SignupDto } from '@app/shared-lib/dto';
-import { UsersRepository } from 'apps/user/src/repositories';
+import {
+  FriendRequestsRepository,
+  UsersRepository,
+} from 'apps/user/src/repositories';
 import { Inject, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { IUser } from '@app/shared-lib/interfaces';
-import { User } from './schemas';
+import { FriendRequests, User } from './schemas';
 
 @Injectable()
 export class UserService {
   constructor(
     @Inject(UsersRepository.name)
     private readonly userRepository: UsersRepository,
+    @Inject(FriendRequests.name)
+    private readonly friendRequestRepository: FriendRequestsRepository,
   ) {}
+
+  async acceptFriendRequest(requestId: string) {
+    const request = await this.friendRequestRepository.findById(requestId);
+    if (!request) throw new RpcException('Not Found');
+
+    const receivingUser = await this.userRepository.findById(
+      request.receiver._id,
+    );
+
+    const requestingUser = await this.userRepository.findById(
+      request.requester._id,
+    );
+
+    if (!requestingUser || !receivingUser) throw new RpcException('Not Found');
+
+    request.established = true;
+    const updatedRequest = await request.save();
+
+    requestingUser.friendRequests.forEach((req) => {
+      if (req?._id?.toString() === requestId) {
+        return (req.established = true);
+      } else {
+        return req;
+      }
+    });
+
+    receivingUser.friendRequests.forEach((req) => {
+      if (req?._id?.toString() === requestId) {
+        return (req.established = true);
+      } else {
+        return req;
+      }
+    });
+
+    requestingUser.markModified('friendRequests');
+    receivingUser.markModified('friendRequests');
+
+    await requestingUser?.save();
+    await receivingUser?.save();
+
+    return {
+      updatedRequest,
+      requesterSpaceId: requestingUser.personalSpace,
+      receivingSpaceId: receivingUser.personalSpace,
+    };
+  }
 
   async addFriend({
     requester,
@@ -19,13 +70,21 @@ export class UserService {
     requester: string;
     receiver: string;
   }) {
-    const receivingUser = await this.findById(receiver);
     const requestingUser = await this.findById(requester);
+    if (!requestingUser) throw new RpcException('Something went wrong');
 
-    if (!receivingUser || !requestingUser)
-      throw new RpcException('Something went wrong');
+    const hasRequestedFriend = requestingUser?.friendRequests.find(
+      (req) => req.receiver._id === receiver || req.receiver._id === requester,
+    );
 
-    const friendRequest = {
+    if (hasRequestedFriend) {
+      return requestingUser?.friendRequests;
+    }
+
+    const receivingUser = await this.findById(receiver);
+    if (!receivingUser) throw new RpcException('Something went wrong');
+
+    const friendRequest = await this.friendRequestRepository.create({
       receiver: {
         _id: receivingUser._id.toString(),
         username: receivingUser.username,
@@ -34,9 +93,7 @@ export class UserService {
         _id: requestingUser._id.toString(),
         username: requestingUser.username,
       },
-      established: false,
-      created: new Date(),
-    };
+    });
 
     requestingUser?.friendRequests?.push(friendRequest);
     receivingUser?.friendRequests?.push(friendRequest);
@@ -121,9 +178,12 @@ export class UserService {
 
   async findByGithubIdOrCreate(user: User) {
     const foundUser = await this.findByGithubId(user.githubId);
-    if (foundUser) return foundUser;
+    if (foundUser) return { user: foundUser, created: false };
 
-    return await this.userRepository.create(user);
+    return {
+      user: (await this.userRepository.create(user)).toObject(),
+      created: true,
+    };
   }
 
   async findById(userId: string, select?: string) {
@@ -140,6 +200,13 @@ export class UserService {
     const user = await this.userRepository.findById(userId);
     user?.chatSpaces.push(chatSpaceId);
     return user?.save();
+  }
+
+  async addPersonalChatSpace(userId: string, chatSpaceId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new RpcException('Something went wrong');
+    user.personalSpace = chatSpaceId;
+    return user.save();
   }
 
   async deleteChatSpace({

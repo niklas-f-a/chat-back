@@ -11,6 +11,7 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { ChatService } from './chat.service';
+import { FriendRequest } from '@app/shared-lib/interfaces';
 
 @Controller()
 export class ChatController {
@@ -38,7 +39,7 @@ export class ChatController {
 
   @MessagePattern({ cmd: 'find-chat-space' })
   findOneChatSpaces(
-    @Payload('roomId') chatSpaceId: string,
+    @Payload('chatSpaceId') chatSpaceId: string,
     @Ctx() context: RmqContext,
   ) {
     this.sharedService.rabbitAck(context);
@@ -76,5 +77,30 @@ export class ChatController {
   ) {
     this.sharedService.rabbitAck(context);
     return this.chatService.addMessage(payload);
+  }
+
+  @MessagePattern({ cmd: 'create-room' })
+  addChatRoom(
+    @Ctx() context: RmqContext,
+    @Payload() { name, chatSpaceId }: { name: string; chatSpaceId: string },
+  ) {
+    this.sharedService.rabbitAck(context);
+    return this.chatService.createRoom(chatSpaceId, name);
+  }
+
+  @MessagePattern({ cmd: 'create-room' })
+  createPersonalChatRoom(
+    @Ctx() context: RmqContext,
+    @Payload()
+    {
+      requesterSpaceId,
+      receivingSpaceId,
+    }: { requesterSpaceId: string; receivingSpaceId: string },
+  ) {
+    this.sharedService.rabbitAck(context);
+    return this.chatService.createPersonalRoom(
+      requesterSpaceId,
+      receivingSpaceId,
+    );
   }
 }

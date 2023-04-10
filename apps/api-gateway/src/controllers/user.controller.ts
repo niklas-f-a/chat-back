@@ -5,6 +5,8 @@ import {
   Controller,
   Get,
   Inject,
+  NotFoundException,
+  Param,
   Post,
   Query,
   UseGuards,
@@ -29,6 +31,8 @@ export class UserController {
 
   @Post('friend-request')
   addFriendRequest(@Body('receiver') receiver: string, @User() user: IUser) {
+    console.log();
+
     return this.userClient
       .send({ cmd: 'add-friend' }, { requester: user._id, receiver })
       .pipe(
@@ -41,5 +45,14 @@ export class UserController {
   @Get('friends')
   getFriends(@User() user: IUser) {
     return this.userClient.send({ cmd: 'get-friends' }, { userId: user._id });
+  }
+
+  @Post('friends/accept')
+  acceptFriendRequest(@Body('requestId') requestId: string) {
+    return this.userClient.send({ cmd: 'accept-request' }, { requestId }).pipe(
+      catchError(() => {
+        throw new NotFoundException();
+      }),
+    );
   }
 }

@@ -5,6 +5,7 @@ import { RpcException } from '@nestjs/microservices';
 import { catchError, concatMap, from, toArray } from 'rxjs';
 import { ChatRoom, ChatSpace, Message } from './db/models';
 import { InjectModel } from '@nestjs/sequelize';
+import { FriendRequest } from '@app/shared-lib/interfaces';
 
 @Injectable()
 export class ChatService {
@@ -20,9 +21,7 @@ export class ChatService {
       createdBy: chatRoomDto.userId,
     });
 
-    const chatRoom = await this.chatRoomModel.create({
-      chatSpaceId: chatSpace.id,
-    });
+    const chatRoom = await this.createRoom(chatSpace.id);
 
     return { chatSpace, chatRoom };
   }
@@ -103,5 +102,29 @@ export class ChatService {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async createRoom(chatSpaceId: string, name?: string) {
+    const chatSpace = await this.findOneChatSpace(chatSpaceId);
+    if (!chatSpace) throw new RpcException('Not found');
+
+    const chatRoom = await this.chatRoomModel.create({
+      chatSpaceId: chatSpace.id,
+      name,
+    });
+
+    return chatRoom;
+  }
+
+  async createPersonalRoom(requesterSpaceId: string, receivingSpaceId: string) {
+    const requesterSpace = await this.findOneChatSpace(requesterSpaceId);
+    const receiverSpace = await this.findOneChatSpace(receivingSpaceId);
+
+    if (!requesterSpace || !receiverSpace) throw new RpcException('Not found');
+
+    await this.createRoom(receiverSpace.id);
+    const requesterChatRoom = await this.createRoom(requesterSpace.id);
+
+    return requesterChatRoom;
   }
 }

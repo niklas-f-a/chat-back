@@ -1,20 +1,38 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, ObjectId } from 'mongoose';
+import { HydratedDocument, ObjectId, Types } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
+export type FriendDocument = HydratedDocument<FriendRequests>;
 
-type FriendRequests = {
+@Schema({ timestamps: true })
+export class FriendRequests {
+  @Prop({
+    type: {
+      _id: String,
+      username: String,
+    },
+  })
   requester: {
     _id: string;
     username: string;
   };
+
+  @Prop({
+    type: {
+      _id: String,
+      username: String,
+    },
+  })
   receiver: {
     _id: string;
     username: string;
   };
+
+  @Prop({ type: Boolean, default: false })
   established: boolean;
-  created: Date;
-};
+
+  _id?: ObjectId;
+}
 
 @Schema()
 export class User {
@@ -45,8 +63,12 @@ export class User {
   @Prop()
   chatSpaces: string[];
 
+  @Prop()
+  personalSpace: string;
+
   @Prop({ required: false, default: [], type: Array })
-  friendRequests?: FriendRequests[];
+  friendRequests: FriendRequests[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+export const FriendSchema = SchemaFactory.createForClass(FriendRequests);

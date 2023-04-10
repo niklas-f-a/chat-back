@@ -1,8 +1,9 @@
-import { ServiceTokens, SharedService } from '@app/shared-lib';
+import { ClientTokens, ServiceTokens, SharedService } from '@app/shared-lib';
 import { SignupDto } from '@app/shared-lib/dto';
 import { IUser } from '@app/shared-lib/interfaces';
 import { Controller, Inject } from '@nestjs/common';
 import {
+  ClientProxy,
   Ctx,
   MessagePattern,
   Payload,
@@ -10,12 +11,14 @@ import {
 } from '@nestjs/microservices';
 import { UserService } from './user.service';
 import { User } from './schemas';
+import { map, switchMap, tap } from 'rxjs';
 
 @Controller()
 export class UserController {
   constructor(
     private readonly sharedService: SharedService,
     @Inject(ServiceTokens.USER) private readonly userService: UserService,
+    @Inject(ClientTokens.CHAT) private readonly chatClient: ClientProxy,
   ) {}
 
   @MessagePattern({ cmd: 'find-by-id' })
@@ -59,6 +62,21 @@ export class UserController {
     return this.userService.joinRoom(payload);
   }
 
+  @MessagePattern({ cmd: 'accept-request' })
+  async acceptFriendRequest(
+    @Ctx() context: RmqContext,
+    @Payload('requestId') requestId: string,
+  ) {
+    this.sharedService.rabbitAck(context);
+
+    const { updatedRequest, requesterSpaceId, receivingSpaceId } =
+      await this.userService.acceptFriendRequest(requestId);
+
+    return this.chatClient
+      .send({ cmd: 'create-room' }, { requesterSpaceId, receivingSpaceId })
+      .pipe(map(() => updatedRequest));
+  }
+
   @MessagePattern({ cmd: 'add-friend' })
   addFriend(
     @Ctx() context: RmqContext,
@@ -76,14 +94,45 @@ export class UserController {
   ) {
     this.sharedService.rabbitAck(context);
 
-    return await this.userService.findByGithubIdOrCreate(user);
+    const res = await this.userService.findByGithubIdOrCreate(user);
+
+    if (res.created) {
+      return this.chatClient
+        .send(
+          { cmd: 'add-chat-space' },
+          { userId: res.user._id, name: 'Your Space' },
+        )
+        .pipe(
+          switchMap((value) =>
+            this.userService.addPersonalChatSpace(
+              res.user._id.toString(),
+              value.chatSpace.id,
+            ),
+          ),
+          switchMap(() => this.userService.findById(res?.user._id?.toString())),
+        );
+    }
+
+    return res.user;
   }
 
   @MessagePattern({ cmd: 'signup' })
-  signup(@Ctx() context: RmqContext, @Payload() signUpDto: SignupDto) {
+  async signup(@Ctx() context: RmqContext, @Payload() signUpDto: SignupDto) {
     this.sharedService.rabbitAck(context);
 
-    return this.userService.create(signUpDto);
+    const user = await this.userService.create(signUpDto);
+
+    return this.chatClient
+      .send({ cmd: 'add-chat-space' }, { userId: user._id, name: 'Your Space' })
+      .pipe(
+        switchMap((value) =>
+          this.userService.addPersonalChatSpace(
+            user._id.toString(),
+            value.chatSpace.id,
+          ),
+        ),
+        switchMap(() => this.userService.findById(user._id.toString())),
+      );
   }
 
   @MessagePattern({ cmd: 'find-by-email' })

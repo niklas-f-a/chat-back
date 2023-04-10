@@ -1,9 +1,19 @@
-import { configuration, ServiceTokens, SharedModule } from '@app/shared-lib';
-import { UsersRepository } from 'apps/user/src/repositories';
+import {
+  ClientTokens,
+  configuration,
+  rabbitProvider,
+  RabbitQueue,
+  ServiceTokens,
+  SharedModule,
+} from '@app/shared-lib';
+import {
+  FriendRequestsRepository,
+  UsersRepository,
+} from 'apps/user/src/repositories';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './schemas';
+import { User, UserSchema, FriendRequests, FriendSchema } from './schemas';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
@@ -24,10 +34,14 @@ import { UserService } from './user.service';
       },
       inject: [ConfigService],
     }),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: FriendRequests.name, schema: FriendSchema },
+    ]),
   ],
   controllers: [UserController],
   providers: [
+    rabbitProvider(ClientTokens.CHAT, RabbitQueue.CHAT),
     {
       provide: ServiceTokens.USER,
       useClass: UserService,
@@ -35,6 +49,10 @@ import { UserService } from './user.service';
     {
       provide: UsersRepository.name,
       useClass: UsersRepository,
+    },
+    {
+      provide: FriendRequests.name,
+      useClass: FriendRequestsRepository,
     },
   ],
 })
