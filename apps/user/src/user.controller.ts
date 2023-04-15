@@ -73,7 +73,10 @@ export class UserController {
       await this.userService.acceptFriendRequest(requestId);
 
     return this.chatClient
-      .send({ cmd: 'create-room' }, { requesterSpaceId, receivingSpaceId })
+      .send(
+        { cmd: 'create-room-personal-room' },
+        { requesterSpaceId, receivingSpaceId },
+      )
       .pipe(map(() => updatedRequest));
   }
 
@@ -95,7 +98,8 @@ export class UserController {
     this.sharedService.rabbitAck(context);
 
     const res = await this.userService.findByGithubIdOrCreate(user);
-
+    // fix persoanl space should not call normal  chatspace
+    // probable must fixes: here, create user / signup
     if (res.created) {
       return this.chatClient
         .send(

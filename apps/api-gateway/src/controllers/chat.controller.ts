@@ -33,9 +33,11 @@ export class ChatController {
   ) {}
 
   @Post('join')
-  joinRoom(@Body('chatSpaceId') chatSpaceId: string, @User() user: IUser) {
+  joinRoom(
+    @Body() { chatSpaceId, userId }: { chatSpaceId: string; userId: string },
+  ) {
     return this.userClient
-      .send({ cmd: 'join-room' }, { chatSpaceId, userId: user._id })
+      .send({ cmd: 'join-room' }, { chatSpaceId, userId })
       .pipe(
         switchMap(() =>
           this.chatClient.send(

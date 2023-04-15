@@ -116,15 +116,15 @@ export class ChatService {
     return chatRoom;
   }
 
-  async createPersonalRoom(requesterSpaceId: string, receivingSpaceId: string) {
-    const requesterSpace = await this.findOneChatSpace(requesterSpaceId);
-    const receiverSpace = await this.findOneChatSpace(receivingSpaceId);
+  // async createPersonalRoom(requesterSpaceId: string, receivingSpaceId: string) {
+  //   const requesterSpace = await this.findOneChatSpace(requesterSpaceId);
+  //   const receiverSpace = await this.findOneChatSpace(receivingSpaceId);
 
-    if (!requesterSpace || !receiverSpace) throw new RpcException('Not found');
+  //   if (!requesterSpace || !receiverSpace) throw new RpcException('Not found');
 
-    await this.createRoom(receiverSpace.id);
-    const requesterChatRoom = await this.createRoom(requesterSpace.id);
+  //   await this.createRoom(receiverSpace.id);
+  //   const requesterChatRoom = await this.createRoom(requesterSpace.id);
 
-    return requesterChatRoom;
-  }
+  //   return requesterChatRoom;
+  // }
 }

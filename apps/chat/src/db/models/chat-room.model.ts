@@ -1,15 +1,18 @@
 import {
   BelongsTo,
+  BelongsToMany,
   Column,
   CreatedAt,
   DataType,
   ForeignKey,
   HasMany,
+  HasOne,
   Model,
   Table,
   UpdatedAt,
 } from 'sequelize-typescript';
-import { ChatSpace, Message } from '.';
+import { ChatSpace, Message, PersonalRoom } from '.';
+import { PersonalSpace } from './personal-space.model';
 
 @Table
 export class ChatRoom extends Model {
@@ -33,4 +36,7 @@ export class ChatRoom extends Model {
 
   @ForeignKey(() => ChatSpace)
   chatSpaceId: string;
+
+  @BelongsToMany(() => PersonalSpace, () => PersonalRoom)
+  personalRooms: Array<PersonalSpace & { PersonalRoom: PersonalRoom }>;
 }

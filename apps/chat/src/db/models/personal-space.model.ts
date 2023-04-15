@@ -5,17 +5,17 @@ import {
   DataType,
   ForeignKey,
   HasMany,
-  HasOne,
   Model,
   PrimaryKey,
   Table,
   UpdatedAt,
 } from 'sequelize-typescript';
-import { ChatRoom } from '.';
-import { PersonalSpace } from './personal-space.model';
+import { ChatSpace } from './chat-space.model';
+import { ChatRoom } from './chat-room.model';
+import { PersonalRoom } from '.';
 
 @Table
-export class ChatSpace extends Model {
+export class PersonalSpace extends Model {
   @PrimaryKey
   @Column({
     type: DataType.UUID,
@@ -39,6 +39,6 @@ export class ChatSpace extends Model {
   @UpdatedAt
   updateAt: Date;
 
-  @HasMany(() => ChatRoom)
-  chatRooms: ChatRoom[];
+  @BelongsToMany(() => ChatRoom, () => PersonalRoom)
+  chatRooms: Array<ChatRoom & { PersonalRoom: PersonalRoom }>;
 }

@@ -88,7 +88,7 @@ export class ChatController {
     return this.chatService.createRoom(chatSpaceId, name);
   }
 
-  @MessagePattern({ cmd: 'create-room' })
+  @MessagePattern({ cmd: 'create-room-personal-room' })
   createPersonalChatRoom(
     @Ctx() context: RmqContext,
     @Payload()
