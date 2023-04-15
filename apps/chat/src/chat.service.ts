@@ -3,9 +3,15 @@ import { ChatSpacePayload } from '@app/shared-lib';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { catchError, concatMap, from, toArray } from 'rxjs';
-import { ChatRoom, ChatSpace, Message } from './db/models';
+import {
+  ChatRoom,
+  ChatSpace,
+  Message,
+  PersonalRoom,
+  PersonalSpace,
+} from './db/models';
 import { InjectModel } from '@nestjs/sequelize';
-import { FriendRequest } from '@app/shared-lib/interfaces';
+import { FriendRequest, IUser } from '@app/shared-lib/interfaces';
 
 @Injectable()
 export class ChatService {
@@ -13,6 +19,9 @@ export class ChatService {
     @InjectModel(ChatRoom) private chatRoomModel: typeof ChatRoom,
     @InjectModel(Message) private messageModel: typeof Message,
     @InjectModel(ChatSpace) private chatSpaceModel: typeof ChatSpace,
+    @InjectModel(PersonalRoom) private personalRoomModel: typeof PersonalRoom,
+    @InjectModel(PersonalSpace)
+    private personalSpaceModel: typeof PersonalSpace,
   ) {}
 
   async createChatSpace(chatRoomDto: ChatSpacePayload) {
@@ -116,15 +125,35 @@ export class ChatService {
     return chatRoom;
   }
 
-  // async createPersonalRoom(requesterSpaceId: string, receivingSpaceId: string) {
-  //   const requesterSpace = await this.findOneChatSpace(requesterSpaceId);
-  //   const receiverSpace = await this.findOneChatSpace(receivingSpaceId);
+  async createPersonalSpace(userId: string) {
+    const personalSpace = await this.personalSpaceModel.create({ userId });
 
-  //   if (!requesterSpace || !receiverSpace) throw new RpcException('Not found');
+    return personalSpace;
+  }
 
-  //   await this.createRoom(receiverSpace.id);
-  //   const requesterChatRoom = await this.createRoom(requesterSpace.id);
+  async createPersonalRoom(requester: IUser, receiver: IUser) {
+    const chatRoom = await this.chatRoomModel.create();
 
-  //   return requesterChatRoom;
-  // }
+    const requestingRoom = await this.personalRoomModel.create({
+      personalSpaceId: requester.personalSpace,
+      chatRoomId: chatRoom.id,
+      user1: requester.username,
+      user2: receiver.username,
+    });
+
+    await this.personalRoomModel.create({
+      personalSpaceId: receiver.personalSpace,
+      chatRoomId: chatRoom.id,
+      user1: requester.username,
+      user2: receiver.username,
+    });
+
+    return requestingRoom;
+  }
+
+  findPersonalSpace(id: string) {
+    return this.personalSpaceModel.findByPk(id, {
+      include: ChatRoom,
+    });
+  }
 }

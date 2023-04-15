@@ -19,10 +19,11 @@ export type FriendRequest = {
 export interface IUser {
   _id: ObjectId;
   email: string;
+  username: string;
   password?: string;
   githubId?: string;
   photos: { value: string }[];
   chatSpaces: string[];
   friendRequests?: FriendRequest[];
-  personalChatSpace?: string;
+  personalSpace?: string;
 }

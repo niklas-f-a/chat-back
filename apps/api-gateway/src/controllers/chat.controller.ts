@@ -114,6 +114,11 @@ export class ChatController {
     return this.chatClient.send({ cmd: 'find-chat-space' }, { chatSpaceId });
   }
 
+  @Get('personal/:id')
+  findPersonalSpace(@Param('id') id: string) {
+    return this.chatClient.send({ cmd: 'find-personal-space' }, { id });
+  }
+
   @Get('rooms/:id')
   getRoom(@Param('id') chatRoomId: string) {
     return this.chatClient.send({ cmd: 'get-chat-room' }, chatRoomId).pipe(

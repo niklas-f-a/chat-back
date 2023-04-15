@@ -6,8 +6,8 @@ import {
   DataType,
   ForeignKey,
   HasMany,
-  HasOne,
   Model,
+  PrimaryKey,
   Table,
   UpdatedAt,
 } from 'sequelize-typescript';
@@ -16,6 +16,13 @@ import { PersonalSpace } from './personal-space.model';
 
 @Table
 export class ChatRoom extends Model {
+  @PrimaryKey
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  })
+  id: string;
+
   @Column({
     type: DataType.TEXT,
     defaultValue: 'Generall',

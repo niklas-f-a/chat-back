@@ -29,10 +29,8 @@ export class UserController {
     return this.userClient.send({ cmd: 'search-for-user' }, query);
   }
 
-  @Post('friend-request')
+  @Post('friends')
   addFriendRequest(@Body('receiver') receiver: string, @User() user: IUser) {
-    console.log();
-
     return this.userClient
       .send({ cmd: 'add-friend' }, { requester: user._id, receiver })
       .pipe(

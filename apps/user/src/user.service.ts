@@ -58,8 +58,10 @@ export class UserService {
 
     return {
       updatedRequest,
-      requesterSpaceId: requestingUser.personalSpace,
-      receivingSpaceId: receivingUser.personalSpace,
+      receivingUser,
+      requestingUser,
+      // requesterSpaceId: requestingUser.personalSpace,
+      // receivingSpaceId: receivingUser.personalSpace,
     };
   }
 

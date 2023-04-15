@@ -69,14 +69,11 @@ export class UserController {
   ) {
     this.sharedService.rabbitAck(context);
 
-    const { updatedRequest, requesterSpaceId, receivingSpaceId } =
+    const { updatedRequest, receivingUser, requestingUser } =
       await this.userService.acceptFriendRequest(requestId);
 
     return this.chatClient
-      .send(
-        { cmd: 'create-room-personal-room' },
-        { requesterSpaceId, receivingSpaceId },
-      )
+      .send({ cmd: 'create-personal-room' }, { receivingUser, requestingUser })
       .pipe(map(() => updatedRequest));
   }
 
@@ -98,19 +95,14 @@ export class UserController {
     this.sharedService.rabbitAck(context);
 
     const res = await this.userService.findByGithubIdOrCreate(user);
-    // fix persoanl space should not call normal  chatspace
-    // probable must fixes: here, create user / signup
     if (res.created) {
       return this.chatClient
-        .send(
-          { cmd: 'add-chat-space' },
-          { userId: res.user._id, name: 'Your Space' },
-        )
+        .send({ cmd: 'create-personal-space' }, { userId: res.user._id })
         .pipe(
           switchMap((value) =>
             this.userService.addPersonalChatSpace(
               res.user._id.toString(),
-              value.chatSpace.id,
+              value.id,
             ),
           ),
           switchMap(() => this.userService.findById(res?.user._id?.toString())),
@@ -127,14 +119,15 @@ export class UserController {
     const user = await this.userService.create(signUpDto);
 
     return this.chatClient
-      .send({ cmd: 'add-chat-space' }, { userId: user._id, name: 'Your Space' })
+      .send({ cmd: 'create-personal-space' }, { userId: user._id })
       .pipe(
-        switchMap((value) =>
-          this.userService.addPersonalChatSpace(
+        switchMap((value) => {
+          console.log(value);
+          return this.userService.addPersonalChatSpace(
             user._id.toString(),
-            value.chatSpace.id,
-          ),
-        ),
+            value.id,
+          );
+        }),
         switchMap(() => this.userService.findById(user._id.toString())),
       );
   }

@@ -8,6 +8,7 @@ import {
   Model,
   PrimaryKey,
   Table,
+  Unique,
   UpdatedAt,
 } from 'sequelize-typescript';
 import { ChatSpace } from './chat-space.model';
@@ -23,15 +24,12 @@ export class PersonalSpace extends Model {
   })
   id: string;
 
+  @Column
+  userId: string;
+
   // default to asset
   @Column
   img: string;
-
-  @Column
-  createdBy: string;
-
-  @Column
-  name: string;
 
   @CreatedAt
   createdAt: Date;
