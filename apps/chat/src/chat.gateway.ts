@@ -30,10 +30,18 @@ export class ChatGateway implements OnModuleInit {
     this.server.on('connection', async (socket) => {
       console.log('connected');
       this.socket = socket;
-      const spaceIds = socket.handshake.auth.chatSpaces;
-      const chatSpacePromises = spaceIds.map((spaceId: string) =>
+
+      const { chatSpaces, personalSpace } = socket.handshake.auth;
+      const pSpace = await this.chatService.findPersonalSpace(personalSpace);
+
+      pSpace?.chatRooms.forEach((room) => {
+        socket.join(room.id);
+      });
+
+      const chatSpacePromises = chatSpaces.map((spaceId: string) =>
         this.chatService.findOneChatSpace(spaceId),
       );
+
       const spaces = await Promise.all(chatSpacePromises);
       spaces.forEach((space) => {
         space.chatRooms.forEach((room: ChatRoom) => {
@@ -47,7 +55,6 @@ export class ChatGateway implements OnModuleInit {
   async sendMessage(@MessageBody() data: { roomId: number; content: string }) {
     const userId = this.socket.handshake.auth._id as string;
     const message = await this.chatService.addMessage({ ...data, userId });
-    console.log(message);
 
     this.server.to(data.roomId.toString()).emit('received-message', message);
   }
