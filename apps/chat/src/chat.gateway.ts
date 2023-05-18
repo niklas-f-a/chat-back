@@ -58,4 +58,9 @@ export class ChatGateway implements OnModuleInit {
 
     this.server.to(data.roomId.toString()).emit('received-message', message);
   }
+
+  @SubscribeMessage('start-stream')
+  async startStream(@MessageBody('roomId') roomId: number) {
+    this.server.to(roomId.toString()).emit('stream-on');
+  }
 }
