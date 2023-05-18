@@ -5,7 +5,6 @@ import {
 } from 'apps/user/src/repositories';
 import { Inject, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { IUser } from '@app/shared-lib/interfaces';
 import { FriendRequests, User } from './schemas';
 
 @Injectable()
@@ -36,17 +35,13 @@ export class UserService {
 
     requestingUser.friendRequests.forEach((req) => {
       if (req?._id?.toString() === requestId) {
-        return (req.established = true);
-      } else {
-        return req;
+        req.established = true;
       }
     });
 
     receivingUser.friendRequests.forEach((req) => {
       if (req?._id?.toString() === requestId) {
-        return (req.established = true);
-      } else {
-        return req;
+        req.established = true;
       }
     });
 
@@ -60,8 +55,6 @@ export class UserService {
       updatedRequest,
       receivingUser,
       requestingUser,
-      // requesterSpaceId: requestingUser.personalSpace,
-      // receivingSpaceId: receivingUser.personalSpace,
     };
   }
 
