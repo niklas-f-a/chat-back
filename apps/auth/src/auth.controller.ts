@@ -36,13 +36,13 @@ export class AuthController {
     this.sharedService.rabbitAck(context);
 
     const { password, email } = loginDto;
-    const emailWithSelect = {
+    const selectOptions = {
       email,
       select: '+password',
     };
 
     return this.userClient
-      .send({ cmd: 'find-by-email' }, emailWithSelect)
+      .send({ cmd: 'find-by-email' }, selectOptions)
       .pipe(switchMap((value) => this.authService.login(password, value)));
   }
 

@@ -11,7 +11,7 @@ import {
   PersonalSpace,
 } from './db/models';
 import { InjectModel } from '@nestjs/sequelize';
-import { FriendRequest, IUser } from '@app/shared-lib/interfaces';
+import { IUser } from '@app/shared-lib/interfaces';
 
 @Injectable()
 export class ChatService {
@@ -52,12 +52,6 @@ export class ChatService {
   }
 
   async deleteChatSpace(chatSpaceId: string) {
-    // delete chat rooms and messages
-
-    // await this.chatRoomModel.destroy({
-    //   where: { chatSpaceId },
-    // });
-
     const roomsDeleted = await this.chatSpaceModel.destroy({
       where: { id: chatSpaceId },
     });
