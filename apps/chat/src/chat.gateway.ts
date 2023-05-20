@@ -1,18 +1,14 @@
 import { Inject, OnModuleInit } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
 import {
-  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-// import { AuthenticatedGuard } from 'apps/auth/src/guards';
 import { Server, Socket } from 'socket.io';
-import { ChatRoom, ChatSpace } from './db/models';
+import { ChatRoom } from './db/models';
 import { ChatService } from './chat.service';
 import { ServiceTokens } from '@app/shared-lib';
-import { from, of, switchMap, tap } from 'rxjs';
 
 @WebSocketGateway({
   cors: {
@@ -28,7 +24,6 @@ export class ChatGateway implements OnModuleInit {
 
   onModuleInit() {
     this.server.on('connection', async (socket) => {
-      console.log('connected');
       this.socket = socket;
 
       const { chatSpaces, personalSpace } = socket.handshake.auth;

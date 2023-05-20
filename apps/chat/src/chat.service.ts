@@ -1,4 +1,3 @@
-// import { ChatRoomDto } from '@app/shared/dto';
 import { ChatSpacePayload } from '@app/shared-lib';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';

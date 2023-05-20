@@ -1,5 +1,5 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { Server } from 'socket.io';
+import { Server, Handshake } from 'socket.io';
 import * as sharedsession from 'express-socket.io-session';
 import { ForbiddenException, INestApplication } from '@nestjs/common';
 import { RequestHandler } from 'express';
@@ -17,7 +17,7 @@ export class IOAdapter extends IoAdapter {
     return firstValueFrom<User>(userClient.send({ cmd: 'find-by-id' }, id));
   }
 
-  createIOServer(port: number, options?: any): any {
+  createIOServer(port: number, options?: any) {
     const server: Server = super.createIOServer(port, options);
 
     server.use(
@@ -27,7 +27,7 @@ export class IOAdapter extends IoAdapter {
     );
 
     server.use(async (socket, next) => {
-      const session = (socket.handshake as any).session as any;
+      const session = (socket.handshake as Handshake).session as any;
       const id = session?.userId ?? session?.passport?.user?._id;
 
       try {

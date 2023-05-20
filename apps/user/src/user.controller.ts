@@ -1,6 +1,5 @@
 import { ClientTokens, ServiceTokens, SharedService } from '@app/shared-lib';
 import { SignupDto } from '@app/shared-lib/dto';
-import { IUser } from '@app/shared-lib/interfaces';
 import { Controller, Inject } from '@nestjs/common';
 import {
   ClientProxy,
@@ -11,7 +10,7 @@ import {
 } from '@nestjs/microservices';
 import { UserService } from './user.service';
 import { User } from './schemas';
-import { map, switchMap, tap } from 'rxjs';
+import { map, switchMap } from 'rxjs';
 
 @Controller()
 export class UserController {

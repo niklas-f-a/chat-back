@@ -1,18 +1,14 @@
 import {
-  BelongsToMany,
   Column,
   CreatedAt,
   DataType,
-  ForeignKey,
   HasMany,
-  HasOne,
   Model,
   PrimaryKey,
   Table,
   UpdatedAt,
 } from 'sequelize-typescript';
 import { ChatRoom } from '.';
-import { PersonalSpace } from './personal-space.model';
 
 @Table
 export class ChatSpace extends Model {

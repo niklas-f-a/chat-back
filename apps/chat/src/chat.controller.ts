@@ -11,7 +11,7 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { ChatService } from './chat.service';
-import { FriendRequest, IUser } from '@app/shared-lib/interfaces';
+import { IUser } from '@app/shared-lib/interfaces';
 
 @Controller()
 export class ChatController {

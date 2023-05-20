@@ -3,15 +3,11 @@ import {
   Column,
   CreatedAt,
   DataType,
-  ForeignKey,
-  HasMany,
   Model,
   PrimaryKey,
   Table,
-  Unique,
   UpdatedAt,
 } from 'sequelize-typescript';
-import { ChatSpace } from './chat-space.model';
 import { ChatRoom } from './chat-room.model';
 import { PersonalRoom } from '.';
 

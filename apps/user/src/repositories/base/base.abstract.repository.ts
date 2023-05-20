@@ -1,6 +1,4 @@
-// import { IBaseRepository } from '.';
 import { Model, FilterQuery, QueryOptions } from 'mongoose';
-// implements IBaseRepository<T>
 export abstract class BaseRepository<T> {
   private entity: Model<T>;
   protected constructor(entity: Model<T>) {
