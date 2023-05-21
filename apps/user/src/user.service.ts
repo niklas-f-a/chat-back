@@ -34,13 +34,13 @@ export class UserService {
     const updatedRequest = await request.save();
 
     requestingUser.friendRequests.forEach((req) => {
-      if (req?._id?.toString() === requestId) {
+      if (req._id?.toString() === requestId) {
         req.established = true;
       }
     });
 
     receivingUser.friendRequests.forEach((req) => {
-      if (req?._id?.toString() === requestId) {
+      if (req._id?.toString() === requestId) {
         req.established = true;
       }
     });
@@ -48,8 +48,8 @@ export class UserService {
     requestingUser.markModified('friendRequests');
     receivingUser.markModified('friendRequests');
 
-    await requestingUser?.save();
-    await receivingUser?.save();
+    await requestingUser.save();
+    await receivingUser.save();
 
     return {
       updatedRequest,
