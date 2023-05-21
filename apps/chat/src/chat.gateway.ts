@@ -61,10 +61,17 @@ export class ChatGateway implements OnModuleInit {
     this.server.to(roomId.toString()).emit('stream-on', id);
   }
 
+  @SubscribeMessage('join-room')
+  async joinedRoom(
+    @MessageBody() { roomId, userId }: { roomId: string; userId: string },
+  ) {
+    this.server.to(roomId.toString()).emit('joined-room', userId);
+  }
+
   @SubscribeMessage('see-stream')
   async watchStream(
-    @MessageBody() { roomId, peerId }: { roomId: string; peerId: string },
+    @MessageBody() { roomId, userId }: { roomId: string; userId: string },
   ) {
-    this.server.to(roomId.toString()).emit('watch-stream', peerId);
+    this.server.to(roomId.toString()).emit('watch-stream', userId);
   }
 }
