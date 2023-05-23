@@ -29,20 +29,20 @@ export class ChatGateway implements OnModuleInit {
       const { chatSpaces, personalSpace } = socket.handshake.auth;
       const pSpace = await this.chatService.findPersonalSpace(personalSpace);
 
-      pSpace?.chatRooms.forEach((room) => {
-        socket.join(room.id);
-      });
-
       const chatSpacePromises = chatSpaces.map((spaceId: string) =>
         this.chatService.findOneChatSpace(spaceId),
       );
 
       const spaces = await Promise.all(chatSpacePromises);
-      spaces.forEach((space) => {
-        space.chatRooms.forEach((room: ChatRoom) => {
-          socket.join(room.id.toString());
-        });
-      });
+
+      // if any new messages has arrived while away notify user in correct room
+      // maybe keep a last sent timestamp in every chatroom to check against
+
+      // pSpace?.chatRooms.forEach((room) => {});
+      // spaces.forEach((space) => {
+      //   space.chatRooms.forEach((room: ChatRoom) => {
+      //   });
+      // });
     });
   }
 
