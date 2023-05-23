@@ -11,6 +11,7 @@ import {
 } from 'sequelize-typescript';
 import { ChatRoom } from '.';
 
+// Todo: Make use of Abstract repository
 @Table
 export class Message extends Model {
   @PrimaryKey

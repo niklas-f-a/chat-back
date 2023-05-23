@@ -9,6 +9,7 @@ import {
 import { ChatRoom } from './chat-room.model';
 import { PersonalSpace } from './personal-space.model';
 
+// Todo: Make use of Abstract repository
 @Table
 export class PersonalRoom extends Model {
   @PrimaryKey
